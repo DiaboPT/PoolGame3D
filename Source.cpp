@@ -27,13 +27,11 @@ const char* TITLE = "My 1st P3D Project";
 int main(void) {
 
 	GLFWwindow* window = nullptr;
-
 	bool fullScreenMode = false;
-	
 	// Runs only one time, in the beggining or when reStated
 	function<void()> Start = [&]() {
-		if (!glfwInit()) return -1;
 
+		if (!glfwInit()) return -1;
 		fullScreenMode = false;
 		if (fullScreenMode)
 			window = glfwCreateWindow(WIDTH, HEIGHT, TITLE, glfwGetPrimaryMonitor(), nullptr); // Full screen
@@ -78,8 +76,6 @@ int main(void) {
 		glfwDestroyWindow(window);
 		glfwTerminate();
 		};
-
 	FrameWork(Start, Update);
-
 	return 0;
 }
