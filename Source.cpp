@@ -110,7 +110,16 @@ int main(void) {
 		};
 
 	// The game's Framework
-	const function<void(function<void()>, function<void()>)> FrameWork = [&](function<void()> Start, function<void()> Update) {
+	const function<void(
+		function<void()>,
+		function<void()>,
+		function<void()>,
+		function<void()>
+		)> FrameWork = [&](
+			function<void()> Start,
+			function<void()> InputManager,
+			function<void()> Update,
+			function<void()> Rendering) {
 
 		Start();
 		while (!glfwWindowShouldClose(window)) {
@@ -122,6 +131,6 @@ int main(void) {
 		glfwDestroyWindow(window);
 		glfwTerminate();
 		};
-	FrameWork(Start, Update);
+	FrameWork(Start, InputManager, Update, Rendering);
 	return 0;
 }
