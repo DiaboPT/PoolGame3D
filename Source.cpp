@@ -38,22 +38,27 @@ static void keyCallback(GLFWwindow* window, int key, int scancode, int action, i
 
 }
 
-
-// The game's Framework
 static void FrameWork(
 	GLFWwindow*& window,
 	function<void()> Start,
 	function<void()> InputManager,
-	function<void()> Update,
+	function<void(float deltaTime)> Update,
 	function<void()> Rendering) {
 
 	Start();
+
+	float lastTime = glfwGetTime();  // Initialize lastTime
+
 	while (!glfwWindowShouldClose(window)) {
+		float currentTime = glfwGetTime();
+		float deltaTime = currentTime - lastTime;
+		lastTime = currentTime;
 
 		InputManager();
-		Update();
+		Update(deltaTime);
 		Rendering();
 	}
+
 	glfwDestroyWindow(window);
 	glfwTerminate();
 }
@@ -112,7 +117,7 @@ int main(void) {
 	function<void()> InputManager = [&]() {
 		};
 	// Runs every frame
-	function<void()> Update = [&]() {
+	function<void(float)> Update = [&](float deltaTime) {
 		};
 	// Renders
 	function<void()> Rendering = [&]() {
