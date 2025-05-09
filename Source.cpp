@@ -38,14 +38,12 @@ static void keyCallback(GLFWwindow* window, int key, int scancode, int action, i
 
 }
 
-<<<<<< < Updated upstream
-	====== =
-	static void FrameWork(
-		GLFWwindow * &window,
-		function<void()> Start,
-		function<void()> InputManager,
-		function<void(float deltaTime)> Update,
-		function<void()> Rendering) {
+static void FrameWork(
+	GLFWwindow*& window,
+	function<void()> Start,
+	function<void()> InputManager,
+	function<void(float deltaTime)> Update,
+	function<void()> Rendering) {
 
 	Start();
 
@@ -65,7 +63,6 @@ static void keyCallback(GLFWwindow* window, int key, int scancode, int action, i
 	glfwTerminate();
 }
 
->>>>>> > Stashed changes
 constexpr int RESOLUTION = 86;
 constexpr int WIDTH = RESOLUTION * 16, HEIGHT = RESOLUTION * 9;
 const char* TITLE = "My 1st P3D Project";
@@ -76,16 +73,6 @@ int main(void) {
 	// Runs only one time, in the beggining or when reStated
 	function<void()> Start = [&]() {
 
-		if (!LoadOpenGLLibrary()) {
-			std::cerr << "Failed to load OpenGL library!" << std::endl;
-			exit(1);
-		}
-
-		void* glClearPtr = GetOpenGLProcAddress("glClear");
-		if (!glClearPtr) {
-			std::cerr << "Failed to load glClear!" << std::endl;
-		}
-
 		if (!glfwInit()) return -1;
 		window = glfwCreateWindow(WIDTH, HEIGHT, TITLE, nullptr, nullptr);
 		if (!window) {
@@ -95,10 +82,14 @@ int main(void) {
 
 		glfwMakeContextCurrent(window);
 
-		// Initialize GLEW
-		if (glewInit() != GLEW_OK) {
-			std::cerr << "Failed to initialize GLEW" << std::endl;
-			return -1;
+		if (!LoadOpenGLLibrary()) {
+			std::cerr << "Failed to load OpenGL library!" << std::endl;
+			exit(1);
+		}
+
+		void* glClearPtr = GetOpenGLProcAddress("glClear");
+		if (!glClearPtr) {
+			std::cerr << "Failed to load glClear!" << std::endl;
 		}
 
 		glfwSetKeyCallback(window, keyCallback);
@@ -116,9 +107,9 @@ int main(void) {
 		);
 
 		glm::mat4 projection = glm::perspective(
-			glm::radians(45.0f),         // campo de visão
-			(float)width / (float)height, // aspeto
-			0.1f, 100.0f                 // plano próximo e distante
+			glm::radians(45.0f),          // campo de visão
+			(float)WIDTH / (float)HEIGHT, // aspeto
+			0.1f, 100.0f                  // plano próximo e distante
 		);
 
 		};
@@ -137,19 +128,6 @@ int main(void) {
 		glfwPollEvents();
 		};
 
-	// The game's Framework
-	const function<void(function<void()>, function<void()>)> FrameWork = [&](function<void()> Start, function<void()> Update) {
-
-		Start();
-		while (!glfwWindowShouldClose(window)) {
-
-			InputManager();
-			Update();
-			Rendering();
-		}
-		glfwDestroyWindow(window);
-		glfwTerminate();
-		};
-	FrameWork(Start, Update);
+	FrameWork(window, Start, InputManager, Update, Rendering);
 	return 0;
 }
