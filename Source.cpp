@@ -1,6 +1,7 @@
-﻿#include <GL/glew.h>
-#include <GLFW/glfw3.h>
 #include <iostream>
+#include <GL/glew.h>
+#include <GLFW/glfw3.h>
+#include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <windows.h>
@@ -77,6 +78,21 @@ int main(void) {
 
 		glViewport(0, 0, WIDTH, HEIGHT);
 		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+    
+    glm::mat4 model = glm::mat4(1.0f); // Identidade (sem transformações ainda)
+
+    glm::mat4 view = glm::lookAt(
+      glm::vec3(0.0f, 3.0f, 5.0f), // posição da câmara
+      glm::vec3(0.0f, 0.0f, 0.0f), // olha para o centro
+      glm::vec3(0.0f, 1.0f, 0.0f)  // vetor "cima"
+    );
+
+    glm::mat4 projection = glm::perspective(
+      glm::radians(45.0f),         // campo de visão
+      (float)width / (float)height, // aspeto
+      0.1f, 100.0f                 // plano próximo e distante
+    );
+
 		};
 	// Inputs
 	function<void()> InputManager = [&]() {
