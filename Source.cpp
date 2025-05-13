@@ -112,6 +112,63 @@ extern "C" {
 
 using namespace std;
 
+//Variáveis globais para OpenGL
+GLuint VAO = 0, VBO = 0, shaderProgram = 0;
+
+const char* vertexShaderSource = R"(
+#version 330 core
+layout(location = 0) in vec3 aPos;
+layout(location = 1) in vec3 aColor;
+out vec3 ourColor;
+uniform mat4 MVP;
+void main() {
+    gl_Position = MVP * vec4(aPos, 1.0);
+    ourColor = aColor;
+}
+)";
+
+const char* fragmentShaderSource = R"(
+#version 330 core
+in vec3 ourColor;
+out vec4 FragColor;
+void main() {
+    FragColor = vec4(ourColor, 1.0);
+}
+)";
+
+GLuint CompileShader(GLenum type, const char* src) {
+	GLuint shader = glCreateShader(type);
+	glShaderSource(shader, 1, &src, nullptr);
+	glCompileShader(shader);
+	GLint success;
+	glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
+	if (!success) {
+		char infoLog[512];
+		glGetShaderInfoLog(shader, 512, nullptr, infoLog);
+		std::cerr << "Shader compilation error: " << infoLog << std::endl;
+	}
+	return shader;
+}
+
+GLuint CreateShaderProgram() {
+	GLuint vertex = CompileShader(GL_VERTEX_SHADER, vertexShaderSource);
+	GLuint fragment = CompileShader(GL_FRAGMENT_SHADER, fragmentShaderSource);
+	GLuint program = glCreateProgram();
+	glAttachShader(program, vertex);
+	glAttachShader(program, fragment);
+	glLinkProgram(program);
+	GLint success;
+	glGetProgramiv(program, GL_LINK_STATUS, &success);
+	if (!success) {
+		char infoLog[512];
+		glGetProgramInfoLog(program, 512, nullptr, infoLog);
+		std::cerr << "Shader link error: " << infoLog << std::endl;
+	}
+	glDeleteShader(vertex);
+	glDeleteShader(fragment);
+	return program;
+}
+
 // Function to set up an Object
 struct OpenGL_Context {
 	// Initialize the member variable  
@@ -140,6 +197,13 @@ struct OpenGL_Context {
 		0.5f, -0.5f, -0.5f, -0.5f, -0.5f, -0.5f, 0.5f, 0.5f, -0.5f,
 		0.5f, 0.5f, -0.5f, -0.5f, -0.5f, -0.5f, -0.5f, 0.5f, -0.5f
 	};
+
+	// Estrutura para armazenar o VAO e VBO do paralelepípedo
+	struct TableMesh {
+		GLuint VAO, VBO;
+	};
+	TableMesh table;
+
 };
 
 // Function to handle key events
@@ -183,6 +247,79 @@ static void FrameWork(
 	glfwTerminate();
 }
 
+void CreateParallelepipedMesh(GLuint& VAO, GLuint& VBO) {
+	// Cada face com cor diferente: posição (vec3) + cor (vec3)
+	GLfloat vertices[] = {
+		// +X
+		0.5f, -0.5f,  0.5f,  1.0f, 0.0f, 0.0f,
+		0.5f, -0.5f, -0.5f,  1.0f, 0.0f, 0.0f,
+		0.5f,  0.5f,  0.5f,  1.0f, 0.0f, 0.0f,
+		0.5f,  0.5f,  0.5f,  1.0f, 0.0f, 0.0f,
+		0.5f, -0.5f, -0.5f,  1.0f, 0.0f, 0.0f,
+		0.5f,  0.5f, -0.5f,  1.0f, 0.0f, 0.0f,
+
+		// -X
+		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f, 0.0f,
+		-0.5f, -0.5f,  0.5f,  0.0f, 1.0f, 0.0f,
+		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f, 0.0f,
+		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f, 0.0f,
+		-0.5f, -0.5f,  0.5f,  0.0f, 1.0f, 0.0f,
+		-0.5f,  0.5f,  0.5f,  0.0f, 1.0f, 0.0f,
+
+		// +Y Verde
+		-0.5f, 0.5f,  0.5f,  0.0f, 0.3f, 0.0f,
+		 0.5f, 0.5f,  0.5f,  0.0f, 0.3f, 0.0f,
+		-0.5f, 0.5f, -0.5f,  0.0f, 0.3f, 0.0f,
+		-0.5f, 0.5f, -0.5f,  0.0f, 0.3f, 0.0f,
+		 0.5f, 0.5f,  0.5f,  0.0f, 0.3f, 0.0f,
+		 0.5f, 0.5f, -0.5f,  0.0f, 0.3f, 0.0f
+
+
+		 // -Y
+		 -0.5f, -0.5f, -0.5f,  1.0f, 1.0f, 0.0f,
+		  0.5f, -0.5f, -0.5f,  1.0f, 1.0f, 0.0f,
+		 -0.5f, -0.5f,  0.5f,  1.0f, 1.0f, 0.0f,
+		 -0.5f, -0.5f,  0.5f,  1.0f, 1.0f, 0.0f,
+		  0.5f, -0.5f, -0.5f,  1.0f, 1.0f, 0.0f,
+		  0.5f, -0.5f,  0.5f,  1.0f, 1.0f, 0.0f,
+
+		  // +Z
+		  -0.5f, -0.5f, 0.5f,   1.0f, 0.0f, 1.0f,
+		   0.5f, -0.5f, 0.5f,   1.0f, 0.0f, 1.0f,
+		  -0.5f,  0.5f, 0.5f,   1.0f, 0.0f, 1.0f,
+		  -0.5f,  0.5f, 0.5f,   1.0f, 0.0f, 1.0f,
+		   0.5f, -0.5f, 0.5f,   1.0f, 0.0f, 1.0f,
+		   0.5f,  0.5f, 0.5f,   1.0f, 0.0f, 1.0f,
+
+		   // -Z
+			0.5f, -0.5f, -0.5f,  0.0f, 1.0f, 1.0f,
+		   -0.5f, -0.5f, -0.5f,  0.0f, 1.0f, 1.0f,
+			0.5f,  0.5f, -0.5f,  0.0f, 1.0f, 1.0f,
+			0.5f,  0.5f, -0.5f,  0.0f, 1.0f, 1.0f,
+		   -0.5f, -0.5f, -0.5f,  0.0f, 1.0f, 1.0f,
+		   -0.5f,  0.5f, -0.5f,  0.0f, 1.0f, 1.0f
+	};
+
+	glGenVertexArrays(1, &VAO);
+	glGenBuffers(1, &VBO);
+
+	glBindVertexArray(VAO);
+	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+	// Posição (vec3)
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (void*)0);
+	glEnableVertexAttribArray(0);
+	// Cor (vec3)
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (void*)(3 * sizeof(GLfloat)));
+	glEnableVertexAttribArray(1);
+
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindVertexArray(0);
+}
+
+
+
 // main function
 int main() {
 
@@ -209,7 +346,9 @@ int main() {
 		}
 
 		// Set up hints for OpenGL context
-		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3); 
+		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+		glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 		// Creates a window:
 		// - size (WIDTH x HEIGHT)
 		// - title (TITLE)
@@ -231,6 +370,25 @@ int main() {
 			glfwTerminate();
 			return -1;
 		}
+		glewExperimental = GL_TRUE; 
+		if (glewInit() != GLEW_OK) {
+			std::cerr << "Failed to initialize GLEW!" << std::endl;
+			exit(-1);
+		}
+		//Inicialização do mesh e shader
+		CreateParallelepipedMesh(VAO, VBO);
+
+		if (VAO == 0) {
+			std::cerr << "Erro ao criar o VAO!" << std::endl;
+			exit(-1);
+		}
+		shaderProgram = CreateShaderProgram();
+
+		if (shaderProgram == 0) {
+			std::cerr << "Erro ao criar o shader program!" << std::endl;
+			exit(-1);
+		}
+
 
 		// Initialize gl functions
 		glEnable(GL_DEPTH_TEST);
@@ -250,11 +408,14 @@ int main() {
 		// Set up the viewport and projection matrix
 		glViewport(0, 0, WIDTH, HEIGHT);
 		// Set up the projection matrix
-		glMatrixMode(GL_PROJECTION);
+
+		// glMatrixMode(GL_PROJECTION);
 		// Set the projection matrix to identity
+		
 		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 		};
 
+		
 	// Input manager function
 	auto InputManager = [&]() {
 
@@ -270,13 +431,34 @@ int main() {
 	// Rendering function
 	auto Rendering = [&]() {
 
+		if (shaderProgram == 0 || VAO == 0) {
+			std::cerr << "Shader program ou VAO não inicializado!" << std::endl;
+			return;
+		}
 		// Clear the screen
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		// Set up the projection matrix
+		
+		//Renderização com shader e MVP
+		glUseProgram(shaderProgram);
+
+		glm::mat4 proj = glm::perspective(glm::radians(45.0f), WIDTH / (float)HEIGHT, 0.1f, 100.0f);
+		glm::mat4 view = glm::lookAt(glm::vec3(2, 2, 2), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
+		glm::mat4 model = glm::mat4(1.0f);
+
+		//Scale da Mesa 
+		model = glm::scale(model, glm::vec3(1.5f, 0.3f, 3.0f));
+		glm::mat4 mvp = proj * view * model;
+
+		GLuint mvpLoc = glGetUniformLocation(shaderProgram, "MVP");
+		glUniformMatrix4fv(mvpLoc, 1, GL_FALSE, glm::value_ptr(mvp));
+
+		glBindVertexArray(VAO);
+		glDrawArrays(GL_TRIANGLES, 0, 36);
+
 		glfwSwapBuffers(window);
-		// Swap buffers
 		glfwPollEvents();
 		};
+
 
 	// Call the framework function
 	FrameWork(window, Start, InputManager, Update, Rendering);
