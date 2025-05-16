@@ -119,7 +119,7 @@ struct OpenGL_Context {
 	// 6 faces, 2 triangles/face, 3 vertices/triangle  
 	static constexpr GLint numVertices = 6 * 2 * 3;
 
-	// (*3) = (xyz/vertice)
+	// numVertices * xyz/vertice
 	GLfloat vertices[numVertices * 3] = {
 		// +X (Face #0)
 		0.5f, -0.5f, 0.5f, 0.5f, -0.5f, -0.5f, 0.5f, 0.5f, 0.5f,
