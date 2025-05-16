@@ -113,7 +113,9 @@ extern "C" {
 using namespace std;
 
 // Variáveis globais para OpenGL
-GLuint VAO = 0, VBO = 0, shaderProgram = 0;
+GLuint shaderProgram = 0;
+GLuint VAO = 0, VBO = 0;
+GLuint sphereVAO, sphereVBO, sphereEBO;
 
 const char* vertexShaderSource = R"(
 #version 330 core
@@ -247,6 +249,7 @@ static void FrameWork(
     glfwTerminate();
 }
 
+// Function to create the parallelepiped mesh
 void CreateParallelepipedMesh(GLuint& VAO, GLuint& VBO) {
     // Cada face com cor diferente: posição (vec3) + cor (vec3)
     GLfloat vertices[] = {
@@ -272,7 +275,7 @@ void CreateParallelepipedMesh(GLuint& VAO, GLuint& VBO) {
         -0.5f, +0.5f, -0.5f, +0.0f, +0.3f, +0.0f,
         -0.5f, +0.5f, -0.5f, +0.0f, +0.3f, +0.0f,
         +0.5f, +0.5f, +0.5f, +0.0f, +0.3f, +0.0f,
-        +0.5f, +0.5f, -0.5f, +0.0f, +0.3f, +0.0f
+		+0.5f, +0.5f, -0.5f, +0.0f, +0.3f, +0.0f,
 
         // -Y
         -0.5f, -0.5f, -0.5f, +1.0f, +1.0f, +0.0f,
@@ -314,6 +317,87 @@ void CreateParallelepipedMesh(GLuint& VAO, GLuint& VBO) {
     glEnableVertexAttribArray(1);
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
+}
+
+#include <vector> // Add this include directive to resolve "std::vector"  
+
+// Function to create a sphere mesh
+void CreateSphereMesh(GLuint& VAO, GLuint& VBO, GLuint& EBO, int sectorCount = 36, int stackCount = 18) {
+    std::vector<GLfloat> vertices;
+    std::vector<GLuint> indices;
+
+    float x, y, z, xy;                          // position
+    float nx, ny, nz, lengthInv = 1.0f;         // normal (optional)
+    float s, t;                                 // texture coord (optional)
+    float radius = 0.5f;
+
+    const float PI = 3.14159265359f;
+    float sectorStep = 2 * PI / sectorCount;
+    float stackStep = PI / stackCount;
+
+    for (int i = 0; i <= stackCount; ++i) {
+        float stackAngle = PI / 2 - i * stackStep;        // from pi/2 to -pi/2
+        xy = radius * cosf(stackAngle);
+        z = radius * sinf(stackAngle);
+
+        for (int j = 0; j <= sectorCount; ++j) {
+            float sectorAngle = j * sectorStep;
+
+            // vertex position (x, y, z)
+            x = xy * cosf(sectorAngle);
+            y = xy * sinf(sectorAngle);
+            vertices.push_back(x);
+            vertices.push_back(y);
+            vertices.push_back(z);
+
+            // color (use normalized position as color)
+            vertices.push_back((x + 0.5f));  // R
+            vertices.push_back((y + 0.5f));  // G
+            vertices.push_back((z + 0.5f));  // B
+        }
+    }
+
+    // Indices
+    for (int i = 0; i < stackCount; ++i) {
+        int k1 = i * (sectorCount + 1);
+        int k2 = k1 + sectorCount + 1;
+
+        for (int j = 0; j < sectorCount; ++j, ++k1, ++k2) {
+            if (i != 0) {
+                indices.push_back(k1);
+                indices.push_back(k2);
+                indices.push_back(k1 + 1);
+            }
+
+            if (i != (stackCount - 1)) {
+                indices.push_back(k1 + 1);
+                indices.push_back(k2);
+                indices.push_back(k2 + 1);
+            }
+        }
+    }
+
+    // OpenGL buffers
+    glGenVertexArrays(1, &VAO);
+    glGenBuffers(1, &VBO);
+    glGenBuffers(1, &EBO);
+
+    glBindVertexArray(VAO);
+
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(GLfloat), vertices.data(), GL_STATIC_DRAW);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(GLuint), indices.data(), GL_STATIC_DRAW);
+
+    // Position
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (void*)0);
+    glEnableVertexAttribArray(0);
+    // Color
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (void*)(3 * sizeof(GLfloat)));
+    glEnableVertexAttribArray(1);
+
     glBindVertexArray(0);
 }
 
@@ -372,8 +456,11 @@ int main() {
             std::cerr << "Failed to initialize GLEW!" << std::endl;
             exit(-1);
         }
-        // Inicialização do mesh e shader
+		// Create a VAO and VBO for the parallelepiped
         CreateParallelepipedMesh(VAO, VBO);
+
+		// Create a sphere mesh
+        CreateSphereMesh(sphereVAO, sphereVBO, sphereEBO);
 
         if (VAO == 0) {
             std::cerr << "Erro ao criar o VAO!" << std::endl;
@@ -385,7 +472,6 @@ int main() {
             std::cerr << "Erro ao criar o shader program!" << std::endl;
             exit(-1);
         }
-
 
         // Initialize gl functions
         glEnable(GL_DEPTH_TEST);
@@ -428,16 +514,19 @@ int main() {
     // Rendering function
     auto Rendering = [&]() {
 
+		// Check if the shader program and VAO are initialized
         if (shaderProgram == 0 || VAO == 0) {
             std::cerr << "Shader program ou VAO não inicializado!" << std::endl;
             return;
         }
+
         // Clear the screen
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         
         // Renderização com shader e MVP
         glUseProgram(shaderProgram);
 
+		// Set up the projection and view matrices
         glm::mat4 proj = glm::perspective(glm::radians(45.0f), WIDTH / (float)HEIGHT, 0.1f, 100.0f);
         glm::mat4 view = glm::lookAt(glm::vec3(2, 2, 2), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
         glm::mat4 model = glm::mat4(1.0f);
@@ -446,12 +535,19 @@ int main() {
         model = glm::scale(model, glm::vec3(1.5f, 0.3f, 3.0f));
         glm::mat4 mvp = proj * view * model;
 
+		// Set the MVP matrix in the shader
         GLuint mvpLoc = glGetUniformLocation(shaderProgram, "MVP");
         glUniformMatrix4fv(mvpLoc, 1, GL_FALSE, glm::value_ptr(mvp));
 
+		// Render the parallelepiped
         glBindVertexArray(VAO);
         glDrawArrays(GL_TRIANGLES, 0, 36);
 
+		// Render the sphere
+        glBindVertexArray(sphereVAO);
+        glDrawArrays(GL_TRIANGLES, 1, 36);
+
+		// Swap buffers and poll events
         glfwSwapBuffers(window);
         glfwPollEvents();
         };
