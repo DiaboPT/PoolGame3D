@@ -86,36 +86,17 @@
 * 	hits another billiard ball or the table boundaries.
 */
 
-#include <iostream>
-#include <GL/glew.h>
-#include <GLFW/glfw3.h>
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
-#include <windows.h>
-#include <functional>
-#include "OpenGLLoader.h"
+#include "Header.h"
 
-#pragma comment(lib, "glew32.lib")
-#pragma comment(lib, "glfw3dll.lib")
-#pragma comment(lib, "opengl32.lib")
-
-// Disable warnings for deprecated OpenGL functions
-extern "C" {
-    // This is for NVIDIA Optimus
-    __declspec(dllexport) DWORD NvOptimusEnablement = 0x00000001;
-    // This is for AMD PowerXpress
-    __declspec(dllexport) DWORD AmdPowerXpressRequestHighPerformance = 0x00000001;
-    // This is for Intel Graphics
-    __declspec(dllexport) DWORD IntelGraphicsRequestHighPerformance = 0x00000001;
-}
-
-using namespace std;
+// Set up window title
+const char* TITLE = "3D Pool Game";
+// Set up window size
+const int WIDTH = 800;
+const int HEIGHT = 600;
 
 // Variáveis globais para OpenGL
 GLuint shaderProgram = 0;
 GLuint VAO = 0, VBO = 0;
-GLuint sphereVAO, sphereVBO, sphereEBO;
 
 const char* vertexShaderSource = R"(
 #version 330 core
@@ -171,43 +152,6 @@ GLuint CreateShaderProgram() {
     return program;
 }
 
-// Function to set up an Object
-struct OpenGL_Context {
-    // Initialize the member variable 
-    string* object_Window_Target = nullptr;
-    // 6 faces, 2 triangles/face, 3 vertices/triangle 
-    static constexpr GLint numVertices = 6 * 2 * 3;
-
-    // numVertices * xyz/vertice
-    GLfloat vertices[numVertices * 3] = {
-        // +X (Face #0)
-        +0.5f, -0.5f, +0.5f, +0.5f, -0.5f, -0.5f, +0.5f, +0.5f, +0.5f,
-        +0.5f, +0.5f, +0.5f, +0.5f, -0.5f, -0.5f, +0.5f, +0.5f, -0.5f,
-        // -X (Face #1)
-        -0.5f, -0.5f, -0.5f, -0.5f, -0.5f, +0.5f, -0.5f, +0.5f, -0.5f,
-        -0.5f, +0.5f, -0.5f, -0.5f, -0.5f, +0.5f, -0.5f, +0.5f, +0.5f,
-        // +Y (Face #2)
-        -0.5f, +0.5f, +0.5f, +0.5f, +0.5f, +0.5f, -0.5f, +0.5f, -0.5f,
-        -0.5f, +0.5f, -0.5f, +0.5f, +0.5f, +0.5f, +0.5f, +0.5f, -0.5f,
-        // -Y (Face #3)
-        -0.5f, -0.5f, -0.5f, +0.5f, -0.5f, -0.5f, -0.5f, -0.5f, +0.5f,
-        -0.5f, -0.5f, +0.5f, +0.5f, -0.5f, -0.5f, +0.5f, -0.5f, +0.5f,
-        // +Z (Face #4)
-        -0.5f, -0.5f, +0.5f, +0.5f, -0.5f, +0.5f, -0.5f, +0.5f, +0.5f,
-        -0.5f, +0.5f, +0.5f, +0.5f, -0.5f, +0.5f, +0.5f, +0.5f, +0.5f,
-        // -Z (Face #5)
-        +0.5f, -0.5f, -0.5f, -0.5f, -0.5f, -0.5f, +0.5f, +0.5f, -0.5f,
-        +0.5f, +0.5f, -0.5f, -0.5f, -0.5f, -0.5f, -0.5f, +0.5f, -0.5f
-    };
-
-    // Estrutura para armazenar o VAO e VBO do paralelepípedo
-    struct TableMesh {
-        GLuint VAO, VBO;
-    };
-    TableMesh table;
-
-};
-
 // Function to handle key events
 static void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
 
@@ -215,38 +159,6 @@ static void keyCallback(GLFWwindow* window, int key, int scancode, int action, i
     if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
 
-}
-
-// Framework function
-static void FrameWork(
-    GLFWwindow*& window,
-    function<void()> Start,
-    function<void()> InputManager,
-    function<void(float deltaTime)> Update,
-    function<void()> Rendering) {
-
-    Start();
-
-    // Initialize lastTime
-    float lastTime = glfwGetTime();
-
-    // Main loop
-    while (!glfwWindowShouldClose(window)) {
-
-        // Calculate delta time
-        float currentTime = glfwGetTime();
-        float deltaTime = currentTime - lastTime;
-        lastTime = currentTime;
-
-        // Call the input manager, update, and rendering functions
-        InputManager();
-        Update(deltaTime);
-        Rendering();
-    }
-
-    // Clean up and close the window
-    glfwDestroyWindow(window);
-    glfwTerminate();
 }
 
 // Function to create the parallelepiped mesh
@@ -275,7 +187,7 @@ void CreateParallelepipedMesh(GLuint& VAO, GLuint& VBO) {
         -0.5f, +0.5f, -0.5f, +0.0f, +0.3f, +0.0f,
         -0.5f, +0.5f, -0.5f, +0.0f, +0.3f, +0.0f,
         +0.5f, +0.5f, +0.5f, +0.0f, +0.3f, +0.0f,
-		+0.5f, +0.5f, -0.5f, +0.0f, +0.3f, +0.0f,
+        +0.5f, +0.5f, -0.5f, +0.0f, +0.3f, +0.0f,
 
         // -Y
         -0.5f, -0.5f, -0.5f, +1.0f, +1.0f, +0.0f,
@@ -320,114 +232,30 @@ void CreateParallelepipedMesh(GLuint& VAO, GLuint& VBO) {
     glBindVertexArray(0);
 }
 
-#include <vector> // Add this include directive to resolve "std::vector"  
+class PoolGame3DFrameWork : public FrameWork {
 
-// Function to create a sphere mesh
-void CreateSphereMesh(GLuint& VAO, GLuint& VBO, GLuint& EBO, int sectorCount = 36, int stackCount = 18) {
-    std::vector<GLfloat> vertices;
-    std::vector<GLuint> indices;
+public:
 
-    float x, y, z, xy;                          // position
-    float nx, ny, nz, lengthInv = 1.0f;         // normal (optional)
-    float s, t;                                 // texture coord (optional)
-    float radius = 0.5f;
-
-    const float PI = 3.14159265359f;
-    float sectorStep = 2 * PI / sectorCount;
-    float stackStep = PI / stackCount;
-
-    for (int i = 0; i <= stackCount; ++i) {
-        float stackAngle = PI / 2 - i * stackStep;        // from pi/2 to -pi/2
-        xy = radius * cosf(stackAngle);
-        z = radius * sinf(stackAngle);
-
-        for (int j = 0; j <= sectorCount; ++j) {
-            float sectorAngle = j * sectorStep;
-
-            // vertex position (x, y, z)
-            x = xy * cosf(sectorAngle);
-            y = xy * sinf(sectorAngle);
-            vertices.push_back(x);
-            vertices.push_back(y);
-            vertices.push_back(z);
-
-            // color (use normalized position as color)
-            vertices.push_back((x + 0.5f));  // R
-            vertices.push_back((y + 0.5f));  // G
-            vertices.push_back((z + 0.5f));  // B
+    ~PoolGame3DFrameWork() {
+        // Cleanup OpenGL resources
+        if (VAO) glDeleteVertexArrays(1, &VAO);
+        if (VBO) glDeleteBuffers(1, &VBO);
+        if (shaderProgram) glDeleteProgram(shaderProgram);
+        if (window) {
+            glfwDestroyWindow(window);
+            glfwTerminate();
         }
     }
-
-    // Indices
-    for (int i = 0; i < stackCount; ++i) {
-        int k1 = i * (sectorCount + 1);
-        int k2 = k1 + sectorCount + 1;
-
-        for (int j = 0; j < sectorCount; ++j, ++k1, ++k2) {
-            if (i != 0) {
-                indices.push_back(k1);
-                indices.push_back(k2);
-                indices.push_back(k1 + 1);
-            }
-
-            if (i != (stackCount - 1)) {
-                indices.push_back(k1 + 1);
-                indices.push_back(k2);
-                indices.push_back(k2 + 1);
-            }
-        }
-    }
-
-    // OpenGL buffers
-    glGenVertexArrays(1, &VAO);
-    glGenBuffers(1, &VBO);
-    glGenBuffers(1, &EBO);
-
-    glBindVertexArray(VAO);
-
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(GLfloat), vertices.data(), GL_STATIC_DRAW);
-
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(GLuint), indices.data(), GL_STATIC_DRAW);
-
-    // Position
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (void*)0);
-    glEnableVertexAttribArray(0);
-    // Color
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (void*)(3 * sizeof(GLfloat)));
-    glEnableVertexAttribArray(1);
-
-    glBindVertexArray(0);
-}
-
-// main function
-int main() {
-
-    // Initialize OpenGL context
-    GLFWwindow* window = nullptr;
-
-    // Set up window size
-    const int WIDTH = 800;
-    const int HEIGHT = 600;
-
-    // Set up window title
-    const char* TITLE = "3D Pool Game";
-
-    // Set up OpenGL context
-    OpenGL_Context context;
-
-    // Start function
-    auto Start = [&]() {
+    void Start() override {
 
         // Checks if OpenGL is initialized
         if (!glfwInit()) {
             std::cerr << "Failed to initialize GLFW!" << std::endl;
-            return -1;
+            return;
         }
 
         // Set up hints for OpenGL context
-        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3); 
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
         // Creates a window:
@@ -439,7 +267,7 @@ int main() {
         if (!window) {
             std::cerr << "Failed to create GLFW window!" << std::endl;
             glfwTerminate();
-            return -1;
+            return;
         }
         glfwMakeContextCurrent(window);
         glfwSetCursorPos(window, WIDTH * 0.5f, HEIGHT * 0.5f);
@@ -449,18 +277,15 @@ int main() {
             std::cerr << "Failed to load OpenGL library!" << std::endl;
             glfwDestroyWindow(window);
             glfwTerminate();
-            return -1;
+            return;
         }
-        glewExperimental = GL_TRUE; 
+        glewExperimental = GL_TRUE;
         if (glewInit() != GLEW_OK) {
             std::cerr << "Failed to initialize GLEW!" << std::endl;
             exit(-1);
         }
-		// Create a VAO and VBO for the parallelepiped
+        // Create a VAO and VBO for the parallelepiped
         CreateParallelepipedMesh(VAO, VBO);
-
-		// Create a sphere mesh
-        CreateSphereMesh(sphereVAO, sphereVBO, sphereEBO);
 
         if (VAO == 0) {
             std::cerr << "Erro ao criar o VAO!" << std::endl;
@@ -494,67 +319,22 @@ int main() {
 
         // glMatrixMode(GL_PROJECTION);
         // Set the projection matrix to identity
-        
+
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-        };
-
-        
-    // Input manager function
-    auto InputManager = [&]() {
-
+    }
+    void InputManager() override {
         // Handle input events here
-        };
+    }
+    void Update(float deltaTime) override {
+        // Update game state here
+    }
+};
 
-    // Update function
-    auto Update = [&](float deltaTime) {
+// main function
+int main() {
 
-        // Updatable game logic here
-        };
-
-    // Rendering function
-    auto Rendering = [&]() {
-
-		// Check if the shader program and VAO are initialized
-        if (shaderProgram == 0 || VAO == 0) {
-            std::cerr << "Shader program ou VAO não inicializado!" << std::endl;
-            return;
-        }
-
-        // Clear the screen
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        
-        // Renderização com shader e MVP
-        glUseProgram(shaderProgram);
-
-		// Set up the projection and view matrices
-        glm::mat4 proj = glm::perspective(glm::radians(45.0f), WIDTH / (float)HEIGHT, 0.1f, 100.0f);
-        glm::mat4 view = glm::lookAt(glm::vec3(2, 2, 2), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
-        glm::mat4 model = glm::mat4(1.0f);
-
-        // Scale da Mesa 
-        model = glm::scale(model, glm::vec3(1.5f, 0.3f, 3.0f));
-        glm::mat4 mvp = proj * view * model;
-
-		// Set the MVP matrix in the shader
-        GLuint mvpLoc = glGetUniformLocation(shaderProgram, "MVP");
-        glUniformMatrix4fv(mvpLoc, 1, GL_FALSE, glm::value_ptr(mvp));
-
-		// Render the parallelepiped
-        glBindVertexArray(VAO);
-        glDrawArrays(GL_TRIANGLES, 0, 36);
-
-		// Render the sphere
-        glBindVertexArray(sphereVAO);
-        glDrawArrays(GL_TRIANGLES, 1, 36);
-
-		// Swap buffers and poll events
-        glfwSwapBuffers(window);
-        glfwPollEvents();
-        };
-
-
-    // Call the framework function
-    FrameWork(window, Start, InputManager, Update, Rendering);
-
+    PoolGame3DFrameWork* frameWork = new PoolGame3DFrameWork();
+    frameWork->RunGame();
+	delete frameWork;
     return 0;
 }

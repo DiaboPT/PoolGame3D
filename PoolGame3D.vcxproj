@@ -127,10 +127,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="FrameWork.cpp" />
     <ClCompile Include="OpenGLLoader.cpp" />
     <ClCompile Include="Source.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="FrameWork.h" />
+    <ClInclude Include="Header.h" />
+    <ClInclude Include="OpenGLHeader.h" />
     <ClInclude Include="OpenGLLoader.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
