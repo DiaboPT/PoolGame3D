@@ -97,9 +97,9 @@
 #include "OpenGLLoader.h"
 #include <vector> // Add this include directive to resolve "std::vector"  
 
-
-#define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
+#define STB_IMAGE_IMPLEMENTATION
+
 
 #pragma comment(lib, "glew32.lib")
 #pragma comment(lib, "glfw3dll.lib")
@@ -131,6 +131,7 @@ float fov = 45.0f;
 bool isRotating = false;
 double lastX = 0.0f, lastY = 0.0f;
 
+//shadder para a mesa 
 const char* vertexShaderSource = R"(
     #version 330 core
     layout(location = 0) in vec3 aPos;
@@ -149,6 +150,28 @@ const char* fragmentShaderSource = R"(
     out vec4 FragColor;
     void main() {
       FragColor = vec4(ourColor, 1.0);
+    }
+)";
+
+// Shader para textura (bolas)
+const char* vertexShaderTexture = R"(
+    #version 330 core
+    layout(location = 0) in vec3 aPos;
+    layout(location = 1) in vec2 aTexCoord;
+    out vec2 TexCoord;
+    uniform mat4 MVP;
+    void main() {
+        gl_Position = MVP * vec4(aPos, 1.0);
+        TexCoord = aTexCoord;
+    }
+)";
+const char* fragmentShaderTexture = R"(
+    #version 330 core
+    in vec2 TexCoord;
+    out vec4 FragColor;
+    uniform sampler2D ourTexture;
+    void main() {
+        FragColor = texture(ourTexture, TexCoord);
     }
 )";
 
