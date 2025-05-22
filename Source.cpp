@@ -580,6 +580,8 @@ int main() {
         // Clear the screen
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         
+        // --- Main Camera Render -----
+
         // Renderização com shader e MVP
         glUseProgram(shaderProgram);
 
@@ -599,7 +601,6 @@ int main() {
 
         glm::mat4 view = glm::lookAt(cameraPos, glm::vec3(0.0f), cameraUp);
 
-
         glm::mat4 model = glm::mat4(1.0f);
 
         // Scale da Mesa 
@@ -617,6 +618,63 @@ int main() {
 		// Render the sphere
         glBindVertexArray(sphereVAO);
         glDrawArrays(GL_TRIANGLES, 1, 36);
+
+        // --- Minimap Render ---
+        // Calculate minimap viewport size & position (top-right corner)
+        int miniW = WIDTH / 4;
+        int miniH = HEIGHT / 4;
+        int miniX = WIDTH - miniW - 10;
+        int miniY = HEIGHT - miniH - 10;
+
+        // Set viewport for minimap
+        glViewport(miniX, miniY, miniW, miniH);
+        glEnable(GL_SCISSOR_TEST);
+        glScissor(miniX, miniY, miniW, miniH);
+
+        // Only clear depth buffer here to keep main view color visible
+        glClear(GL_DEPTH_BUFFER_BIT);
+
+        // Setup static top-down camera for minimap
+        glm::vec3 topCamPos = glm::vec3(0.0f, 5.0f, 0.0f);
+        glm::vec3 topCamTarget = glm::vec3(0.0f, 0.0f, 0.0f);
+        glm::vec3 topCamUp = glm::vec3(0.0f, 0.0f, -1.0f); // "up" in top-down view
+        
+        // Orthographic projection: adjust these bounds to control visible area size
+        float minimapAspect = miniW / (float)miniH;
+        float tableHalfWidth = 1.5f * 0.01f;
+        float tableHalfLenght = 3.0f * 0.01f;
+
+        if (minimapAspect > 1.0f)
+            tableHalfLenght *= minimapAspect;
+        else
+            tableHalfWidth *= minimapAspect;
+
+        float padding = 0.5f;
+        tableHalfLenght += padding;
+        tableHalfWidth += padding;
+
+        glm::mat4 topProjection = glm::ortho(-tableHalfWidth, tableHalfWidth, // Left, Right
+                                             -tableHalfLenght, tableHalfLenght, // Bottom, Top
+                                             0.1f, 100.0f);        
+        //glm::mat4 topProjection = glm::perspective(glm::radians(110.0f), miniW / (float)miniH, 0.1f, 100.0f);
+
+        glm::mat4 topModel = glm::mat4(1.0f);
+        glm::mat4 topView = glm::lookAt(topCamPos, topCamTarget, topCamUp);
+        glm::mat4 topMVP = topProjection * topView * topModel;
+        glUniformMatrix4fv(mvpLoc, 1, GL_FALSE, glm::value_ptr(topMVP));
+
+        // Draw the table again in minimap
+        glBindVertexArray(VAO);
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+
+        // Draw balls again
+        glBindVertexArray(sphereVAO);
+        glDrawArrays(GL_TRIANGLES, 1, 36);
+
+        glDisable(GL_SCISSOR_TEST);
+
+        // Reset viewport to full screen for next frame
+        glViewport(0, 0, WIDTH, HEIGHT);
 
 		// Swap buffers and poll events
         glfwSwapBuffers(window);
