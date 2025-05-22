@@ -95,6 +95,7 @@
 #include <windows.h>
 #include <functional>
 #include "OpenGLLoader.h"
+#include <vector> // Add this include directive to resolve "std::vector"  
 
 #pragma comment(lib, "glew32.lib")
 #pragma comment(lib, "glfw3dll.lib")
@@ -117,25 +118,32 @@ GLuint shaderProgram = 0;
 GLuint VAO = 0, VBO = 0;
 GLuint sphereVAO, sphereVBO, sphereEBO;
 
+float cameraDistance = 5.0f;
+float cameraPitch = -30.0f;
+float cameraYaw = 0.0f;
+
+bool isRotating = false;
+double lastX = 0.0f, lastY = 0.0f;
+
 const char* vertexShaderSource = R"(
-#version 330 core
-layout(location = 0) in vec3 aPos;
-layout(location = 1) in vec3 aColor;
-out vec3 ourColor;
-uniform mat4 MVP;
-void main() {
-  gl_Position = MVP * vec4(aPos, 1.0);
-  ourColor = aColor;
-}
+    #version 330 core
+    layout(location = 0) in vec3 aPos;
+    layout(location = 1) in vec3 aColor;
+    out vec3 ourColor;
+    uniform mat4 MVP;
+    void main() {
+      gl_Position = MVP * vec4(aPos, 1.0);
+      ourColor = aColor;
+    }
 )";
 
 const char* fragmentShaderSource = R"(
-#version 330 core
-in vec3 ourColor;
-out vec4 FragColor;
-void main() {
-  FragColor = vec4(ourColor, 1.0);
-}
+    #version 330 core
+    in vec3 ourColor;
+    out vec4 FragColor;
+    void main() {
+      FragColor = vec4(ourColor, 1.0);
+    }
 )";
 
 GLuint CompileShader(GLenum type, const char* src) {
@@ -175,6 +183,7 @@ GLuint CreateShaderProgram() {
 struct OpenGL_Context {
     // Initialize the member variable 
     string* object_Window_Target = nullptr;
+    
     // 6 faces, 2 triangles/face, 3 vertices/triangle 
     static constexpr GLint numVertices = 6 * 2 * 3;
 
@@ -253,7 +262,7 @@ static void FrameWork(
 void CreateParallelepipedMesh(GLuint& VAO, GLuint& VBO) {
     // Cada face com cor diferente: posição (vec3) + cor (vec3)
     GLfloat vertices[] = {
-        // +X
+        // +X Direita Vermelho
         +0.5f, -0.5f, +0.5f, +1.0f, +0.0f, +0.0f,
         +0.5f, -0.5f, -0.5f, +1.0f, +0.0f, +0.0f,
         +0.5f, +0.5f, +0.5f, +1.0f, +0.0f, +0.0f,
@@ -261,7 +270,7 @@ void CreateParallelepipedMesh(GLuint& VAO, GLuint& VBO) {
         +0.5f, -0.5f, -0.5f, +1.0f, +0.0f, +0.0f,
         +0.5f, +0.5f, -0.5f, +1.0f, +0.0f, +0.0f,
 
-        // -X
+        // -X Esquerda
         -0.5f, -0.5f, -0.5f, +0.0f, +1.0f, +0.0f,
         -0.5f, -0.5f, +0.5f, +0.0f, +1.0f, +0.0f,
         -0.5f, +0.5f, -0.5f, +0.0f, +1.0f, +0.0f,
@@ -269,7 +278,7 @@ void CreateParallelepipedMesh(GLuint& VAO, GLuint& VBO) {
         -0.5f, -0.5f, +0.5f, +0.0f, +1.0f, +0.0f,
         -0.5f, +0.5f, +0.5f, +0.0f, +1.0f, +0.0f,
 
-        // +Y Verde
+        // +Y Cima Verde
         -0.5f, +0.5f, +0.5f, +0.0f, +0.3f, +0.0f,
         +0.5f, +0.5f, +0.5f, +0.0f, +0.3f, +0.0f,
         -0.5f, +0.5f, -0.5f, +0.0f, +0.3f, +0.0f,
@@ -277,7 +286,7 @@ void CreateParallelepipedMesh(GLuint& VAO, GLuint& VBO) {
         +0.5f, +0.5f, +0.5f, +0.0f, +0.3f, +0.0f,
 		+0.5f, +0.5f, -0.5f, +0.0f, +0.3f, +0.0f,
 
-        // -Y
+        // -Y Baixo
         -0.5f, -0.5f, -0.5f, +1.0f, +1.0f, +0.0f,
         +0.5f, -0.5f, -0.5f, +1.0f, +1.0f, +0.0f,
         -0.5f, -0.5f, +0.5f, +1.0f, +1.0f, +0.0f,
@@ -285,15 +294,15 @@ void CreateParallelepipedMesh(GLuint& VAO, GLuint& VBO) {
         +0.5f, -0.5f, -0.5f, +1.0f, +1.0f, +0.0f,
         +0.5f, -0.5f, +0.5f, +1.0f, +1.0f, +0.0f,
 
-        // +Z
-        -0.5f, -0.5f, +0.5f, +1.0f, +0.0f, +1.0f,
-        +0.5f, -0.5f, +0.5f, +1.0f, +0.0f, +1.0f,
-        -0.5f, +0.5f, +0.5f, +1.0f, +0.0f, +1.0f,
-        -0.5f, +0.5f, +0.5f, +1.0f, +0.0f, +1.0f,
-        +0.5f, -0.5f, +0.5f, +1.0f, +0.0f, +1.0f,
-        +0.5f, +0.5f, +0.5f, +1.0f, +0.0f, +1.0f,
+        // +Z Frente
+        -0.5f, -0.5f, +0.5f, +1.0f, +1.0f, +1.0f,
+        +0.5f, -0.5f, +0.5f, +1.0f, +1.0f, +1.0f,
+        -0.5f, +0.5f, +0.5f, +1.0f, +1.0f, +1.0f,
+        -0.5f, +0.5f, +0.5f, +1.0f, +1.0f, +1.0f,
+        +0.5f, -0.5f, +0.5f, +1.0f, +1.0f, +1.0f,
+        +0.5f, +0.5f, +0.5f, +1.0f, +1.0f, +1.0f,
 
-        // -Z
+        // -Z Trás
         +0.5f, -0.5f, -0.5f, +0.0f, +1.0f, +1.0f,
         -0.5f, -0.5f, -0.5f, +0.0f, +1.0f, +1.0f,
         +0.5f, +0.5f, -0.5f, +0.0f, +1.0f, +1.0f,
@@ -312,6 +321,7 @@ void CreateParallelepipedMesh(GLuint& VAO, GLuint& VBO) {
     // Posição (vec3)
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (void*)0);
     glEnableVertexAttribArray(0);
+
     // Cor (vec3)
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (void*)(3 * sizeof(GLfloat)));
     glEnableVertexAttribArray(1);
@@ -319,8 +329,6 @@ void CreateParallelepipedMesh(GLuint& VAO, GLuint& VBO) {
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
 }
-
-#include <vector> // Add this include directive to resolve "std::vector"  
 
 // Function to create a sphere mesh
 void CreateSphereMesh(GLuint& VAO, GLuint& VBO, GLuint& EBO, int sectorCount = 36, int stackCount = 18) {
@@ -394,11 +402,42 @@ void CreateSphereMesh(GLuint& VAO, GLuint& VBO, GLuint& EBO, int sectorCount = 3
     // Position
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (void*)0);
     glEnableVertexAttribArray(0);
+
     // Color
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (void*)(3 * sizeof(GLfloat)));
     glEnableVertexAttribArray(1);
 
     glBindVertexArray(0);
+}
+
+void MouseButtonCallback(GLFWwindow* window, int button, int action, int mods) {
+    if (button == GLFW_MOUSE_BUTTON_LEFT) {
+        if (action == GLFW_PRESS) {
+            isRotating = true;
+            glfwGetCursorPos(window, &lastX, &lastY);
+        }
+        else if (action == GLFW_RELEASE) {
+            isRotating = false;
+        }
+    }
+}
+
+void MouseCallback(GLFWwindow* window, double xpos, double ypos) {
+    if (!isRotating) return;
+
+    float sensitivity = 0.1f;
+    float xoffset = xpos - lastX;
+    float yoffset = lastY - ypos;
+
+    lastX = xpos;
+    lastY = ypos;
+
+    cameraYaw += xoffset * sensitivity;
+    cameraPitch += yoffset * sensitivity;
+
+    // Clamp pitch to prevent flipping
+    if (cameraPitch > 30.0f) cameraPitch = 30.0f;
+    if (cameraPitch < 30.0f) cameraPitch = -30.0f;
 }
 
 // main function
@@ -430,19 +469,24 @@ int main() {
         glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3); 
         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+        
         // Creates a window:
         // - size (WIDTH x HEIGHT)
         // - title (TITLE)
         // - monitor (monitor default)
         // - windowed mode (window)
         window = glfwCreateWindow(WIDTH, HEIGHT, TITLE, nullptr, nullptr);
+        
         if (!window) {
             std::cerr << "Failed to create GLFW window!" << std::endl;
             glfwTerminate();
             return -1;
         }
+
         glfwMakeContextCurrent(window);
         glfwSetCursorPos(window, WIDTH * 0.5f, HEIGHT * 0.5f);
+        glfwSetMouseButtonCallback(window, MouseButtonCallback);
+        glfwSetCursorPosCallback(window, MouseCallback);
 
         // Checks if OpenGL Library is loaded
         if (!LoadOpenGLLibrary()) {
@@ -451,11 +495,13 @@ int main() {
             glfwTerminate();
             return -1;
         }
+
         glewExperimental = GL_TRUE; 
         if (glewInit() != GLEW_OK) {
             std::cerr << "Failed to initialize GLEW!" << std::endl;
-            exit(-1);
+            return -1;
         }
+
 		// Create a VAO and VBO for the parallelepiped
         CreateParallelepipedMesh(VAO, VBO);
 
@@ -464,13 +510,13 @@ int main() {
 
         if (VAO == 0) {
             std::cerr << "Erro ao criar o VAO!" << std::endl;
-            exit(-1);
+            return -1;
         }
         shaderProgram = CreateShaderProgram();
 
         if (shaderProgram == 0) {
             std::cerr << "Erro ao criar o shader program!" << std::endl;
-            exit(-1);
+            return -1;
         }
 
         // Initialize gl functions
@@ -485,7 +531,7 @@ int main() {
         glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
         glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
         glfwSetInputMode(window, GLFW_STICKY_MOUSE_BUTTONS, GL_TRUE);
-        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_CAPTURED);
+        //glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_CAPTURED);
         glfwSetKeyCallback(window, keyCallback);
 
         // Set up the viewport and projection matrix
@@ -498,7 +544,6 @@ int main() {
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         };
 
-        
     // Input manager function
     auto InputManager = [&]() {
 
@@ -528,7 +573,21 @@ int main() {
 
 		// Set up the projection and view matrices
         glm::mat4 proj = glm::perspective(glm::radians(45.0f), WIDTH / (float)HEIGHT, 0.1f, 100.0f);
-        glm::mat4 view = glm::lookAt(glm::vec3(2, 2, 2), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
+
+        // Moving the world
+        //glm::mat4 view = glm::lookAt(glm::vec3(2, 2, 2), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
+        glm::vec3 direction;
+        direction.x = cos(glm::radians(cameraYaw)) * cos(glm::radians(cameraPitch));
+        direction.y = sin(glm::radians(cameraPitch));
+        direction.z = sin(glm::radians(cameraYaw)) * cos(glm::radians(cameraPitch));
+        glm::vec3 cameraTarget = glm::normalize(direction);
+
+        glm::vec3 cameraPos = -cameraTarget * cameraDistance;
+        glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
+
+        glm::mat4 view = glm::lookAt(cameraPos, glm::vec3(0.0f), cameraUp);
+
+
         glm::mat4 model = glm::mat4(1.0f);
 
         // Scale da Mesa 
@@ -551,7 +610,6 @@ int main() {
         glfwSwapBuffers(window);
         glfwPollEvents();
         };
-
 
     // Call the framework function
     FrameWork(window, Start, InputManager, Update, Rendering);
