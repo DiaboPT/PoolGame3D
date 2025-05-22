@@ -644,11 +644,13 @@ int main() {
         float tableHalfWidth = 1.5f * 0.01f;
         float tableHalfLenght = 3.0f * 0.01f;
 
+        // Adjusting minimap aspect ratio
         if (minimapAspect > 1.0f)
-            tableHalfLenght *= minimapAspect;
+            tableHalfLenght *= minimapAspect; // Wider than tall - expand width
         else
-            tableHalfWidth *= minimapAspect;
+            tableHalfWidth /= minimapAspect; // Taller than wide - expand height
 
+        // Padding around the table
         float padding = 0.5f;
         tableHalfLenght += padding;
         tableHalfWidth += padding;
@@ -656,7 +658,6 @@ int main() {
         glm::mat4 topProjection = glm::ortho(-tableHalfWidth, tableHalfWidth, // Left, Right
                                              -tableHalfLenght, tableHalfLenght, // Bottom, Top
                                              0.1f, 100.0f);        
-        //glm::mat4 topProjection = glm::perspective(glm::radians(110.0f), miniW / (float)miniH, 0.1f, 100.0f);
 
         glm::mat4 topModel = glm::mat4(1.0f);
         glm::mat4 topView = glm::lookAt(topCamPos, topCamTarget, topCamUp);
