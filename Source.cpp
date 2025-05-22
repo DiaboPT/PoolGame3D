@@ -96,10 +96,10 @@
 #include <functional>
 #include "OpenGLLoader.h"
 #include <vector> // Add this include directive to resolve "std::vector"  
-
 #include "stb_image.h"
-#define STB_IMAGE_IMPLEMENTATION
+#include "ObjModelLoader.h"
 
+#define STB_IMAGE_IMPLEMENTATION
 
 #pragma comment(lib, "glew32.lib")
 #pragma comment(lib, "glfw3dll.lib")
@@ -115,12 +115,18 @@ extern "C" {
     __declspec(dllexport) DWORD IntelGraphicsRequestHighPerformance = 0x00000001;
 }
 
+using namespace PoolGame3D;
 using namespace std;
 
 // Variáveis globais para OpenGL
 GLuint shaderProgram = 0;
 GLuint VAO = 0, VBO = 0;
 GLuint sphereVAO, sphereVBO, sphereEBO;
+
+//vetor Bolas
+std::vector<ObjModelLoader> bolas;
+std::vector<glm::vec3> posicoesBolas; // Para armazenar as posições das bolas
+
 
 // Camera
 float cameraDistance = 5.0f;

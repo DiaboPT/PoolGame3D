@@ -127,10 +127,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="ObjModelLoader.cpp" />
     <ClCompile Include="OpenGLLoader.cpp" />
     <ClCompile Include="Source.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="ObjModelLoader.h" />
     <ClInclude Include="OpenGLLoader.h" />
     <ClInclude Include="stb_image.h" />
   </ItemGroup>
