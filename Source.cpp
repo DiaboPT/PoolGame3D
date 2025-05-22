@@ -97,6 +97,10 @@
 #include "OpenGLLoader.h"
 #include <vector> // Add this include directive to resolve "std::vector"  
 
+
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
+
 #pragma comment(lib, "glew32.lib")
 #pragma comment(lib, "glfw3dll.lib")
 #pragma comment(lib, "opengl32.lib")
