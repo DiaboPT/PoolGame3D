@@ -118,9 +118,11 @@ GLuint shaderProgram = 0;
 GLuint VAO = 0, VBO = 0;
 GLuint sphereVAO, sphereVBO, sphereEBO;
 
+// Camera
 float cameraDistance = 5.0f;
 float cameraPitch = -30.0f;
 float cameraYaw = 0.0f;
+float fov = 45.0f;
 
 bool isRotating = false;
 double lastX = 0.0f, lastY = 0.0f;
@@ -440,6 +442,15 @@ void MouseCallback(GLFWwindow* window, double xpos, double ypos) {
     if (cameraPitch < 30.0f) cameraPitch = -30.0f;
 }
 
+void ScrollCallback(GLFWwindow* window, double xoffset, double yoffset) {
+    fov -= (float)yoffset;
+
+    if (fov < 20.0f)
+        fov = 20.0f;
+    if (fov > 45.0f)
+        fov = 45.0f;
+}
+
 // main function
 int main() {
 
@@ -487,6 +498,7 @@ int main() {
         glfwSetCursorPos(window, WIDTH * 0.5f, HEIGHT * 0.5f);
         glfwSetMouseButtonCallback(window, MouseButtonCallback);
         glfwSetCursorPosCallback(window, MouseCallback);
+        glfwSetScrollCallback(window, ScrollCallback);
 
         // Checks if OpenGL Library is loaded
         if (!LoadOpenGLLibrary()) {
@@ -572,7 +584,7 @@ int main() {
         glUseProgram(shaderProgram);
 
 		// Set up the projection and view matrices
-        glm::mat4 proj = glm::perspective(glm::radians(45.0f), WIDTH / (float)HEIGHT, 0.1f, 100.0f);
+        glm::mat4 proj = glm::perspective(glm::radians(fov), WIDTH / (float)HEIGHT, 0.1f, 100.0f);
 
         // Moving the world
         //glm::mat4 view = glm::lookAt(glm::vec3(2, 2, 2), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
