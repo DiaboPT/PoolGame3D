@@ -121,7 +121,6 @@ using namespace std;
 // Variáveis globais para OpenGL
 GLuint shaderProgram = 0;
 GLuint VAO = 0, VBO = 0;
-GLuint sphereVAO, sphereVBO, sphereEBO;
 
 //vetor Bolas
 std::vector<ObjModelLoader> bolas;
@@ -296,6 +295,7 @@ static void FrameWork(
 // Function to create the parallelepiped mesh
 void CreateParallelepipedMesh(GLuint& VAO, GLuint& VBO) {
     // Cada face com cor diferente: posição (vec3) + cor (vec3)
+    // position (x, y, z) + color (r, g, b)
     GLfloat vertices[] = {
         // +X Direita Vermelho
         +0.5f, -0.5f, +0.5f, +1.0f, +0.0f, +0.0f,
@@ -319,7 +319,7 @@ void CreateParallelepipedMesh(GLuint& VAO, GLuint& VBO) {
         -0.5f, +0.5f, -0.5f, +0.0f, +0.3f, +0.0f,
         -0.5f, +0.5f, -0.5f, +0.0f, +0.3f, +0.0f,
         +0.5f, +0.5f, +0.5f, +0.0f, +0.3f, +0.0f,
-		+0.5f, +0.5f, -0.5f, +0.0f, +0.3f, +0.0f,
+        +0.5f, +0.5f, -0.5f, +0.0f, +0.3f, +0.0f,
 
         // -Y Baixo
         -0.5f, -0.5f, -0.5f, +1.0f, +1.0f, +0.0f,
@@ -362,86 +362,6 @@ void CreateParallelepipedMesh(GLuint& VAO, GLuint& VBO) {
     glEnableVertexAttribArray(1);
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindVertexArray(0);
-}
-
-// Function to create a sphere mesh
-void CreateSphereMesh(GLuint& VAO, GLuint& VBO, GLuint& EBO, int sectorCount = 36, int stackCount = 18) {
-    std::vector<GLfloat> vertices;
-    std::vector<GLuint> indices;
-
-    float x, y, z, xy;                          // position
-    float nx, ny, nz, lengthInv = 1.0f;         // normal (optional)
-    float s, t;                                 // texture coord (optional)
-    float radius = 0.5f;
-
-    const float PI = 3.14159265359f;
-    float sectorStep = 2 * PI / sectorCount;
-    float stackStep = PI / stackCount;
-
-    for (int i = 0; i <= stackCount; ++i) {
-        float stackAngle = PI / 2 - i * stackStep;        // from pi/2 to -pi/2
-        xy = radius * cosf(stackAngle);
-        z = radius * sinf(stackAngle);
-
-        for (int j = 0; j <= sectorCount; ++j) {
-            float sectorAngle = j * sectorStep;
-
-            // vertex position (x, y, z)
-            x = xy * cosf(sectorAngle);
-            y = xy * sinf(sectorAngle);
-            vertices.push_back(x);
-            vertices.push_back(y);
-            vertices.push_back(z);
-
-            // color (use normalized position as color)
-            vertices.push_back((x + 0.5f));  // R
-            vertices.push_back((y + 0.5f));  // G
-            vertices.push_back((z + 0.5f));  // B
-        }
-    }
-
-    // Indices
-    for (int i = 0; i < stackCount; ++i) {
-        int k1 = i * (sectorCount + 1);
-        int k2 = k1 + sectorCount + 1;
-
-        for (int j = 0; j < sectorCount; ++j, ++k1, ++k2) {
-            if (i != 0) {
-                indices.push_back(k1);
-                indices.push_back(k2);
-                indices.push_back(k1 + 1);
-            }
-
-            if (i != (stackCount - 1)) {
-                indices.push_back(k1 + 1);
-                indices.push_back(k2);
-                indices.push_back(k2 + 1);
-            }
-        }
-    }
-
-    // OpenGL buffers
-    glGenVertexArrays(1, &VAO);
-    glGenBuffers(1, &VBO);
-    glGenBuffers(1, &EBO);
-
-    glBindVertexArray(VAO);
-
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(GLfloat), vertices.data(), GL_STATIC_DRAW);
-
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(GLuint), indices.data(), GL_STATIC_DRAW);
-
-    // Position
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (void*)0);
-    glEnableVertexAttribArray(0);
-
-    // Color
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (void*)(3 * sizeof(GLfloat)));
-    glEnableVertexAttribArray(1);
-
     glBindVertexArray(0);
 }
 
@@ -514,11 +434,7 @@ int main() {
         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
         
-        // Creates a window:
-        // - size (WIDTH x HEIGHT)
-        // - title (TITLE)
-        // - monitor (monitor default)
-        // - windowed mode (window)
+        // Creates a window
         window = glfwCreateWindow(WIDTH, HEIGHT, TITLE, nullptr, nullptr);
         
         if (!window) {
@@ -547,21 +463,34 @@ int main() {
             return -1;
         }
 
-		// Create a VAO and VBO for the parallelepiped
+        // Create a VAO and VBO for the parallelepiped
         CreateParallelepipedMesh(VAO, VBO);
 
-		// Create a sphere mesh
-        CreateSphereMesh(sphereVAO, sphereVBO, sphereEBO);
-
-        if (VAO == 0) {
-            std::cerr << "Erro ao criar o VAO!" << std::endl;
+        // Create the VAO and VBO for the parallelepiped
+        if (VBO == 0) {
+            std::cerr << "Erro ao criar o VBO!" << std::endl;
             return -1;
         }
+
+        // shader program for the table
         shaderProgram = CreateShaderProgram();
 
+        // if shader program is not created
         if (shaderProgram == 0) {
             std::cerr << "Erro ao criar o shader program!" << std::endl;
             return -1;
+        }
+
+        // Load the rest of the balls
+        for (int i = 0; i <= 15; ++i) {
+            ObjModelLoader ball;
+            std::string path = "poolBalls/Ball" + std::to_string(i +1) + ".obj";
+            ball.Load(path);
+            ball.Install();
+            std::string texturePath = "poolBalls/PoolBalluv" + std::to_string(i + 1) + ".jpg";
+            ball.LoadTexture(texturePath);
+            bolas.push_back(ball);
+            posicoesBolas.push_back(glm::vec3(0.0f, i, 0.0f)); // Add the position of the ball
         }
 
         // Initialize gl functions
@@ -579,13 +508,10 @@ int main() {
         //glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_CAPTURED);
         glfwSetKeyCallback(window, keyCallback);
 
-        // Set up the viewport and projection matrix
+        // Set up the viewport
         glViewport(0, 0, WIDTH, HEIGHT);
-        // Set up the projection matrix
 
-        // glMatrixMode(GL_PROJECTION);
-        // Set the projection matrix to identity
-        
+        // Set up the clear color
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         };
 
@@ -604,7 +530,7 @@ int main() {
     // Rendering function
     auto Rendering = [&]() {
 
-		// Check if the shader program and VAO are initialized
+        // Check if the shader program and VAO are initialized
         if (shaderProgram == 0 || VAO == 0) {
             std::cerr << "Shader program ou VAO não inicializado!" << std::endl;
             return;
@@ -618,7 +544,7 @@ int main() {
         // Renderização com shader e MVP
         glUseProgram(shaderProgram);
 
-		// Set up the projection and view matrices
+        // Set up the projection and view matrices
         glm::mat4 proj = glm::perspective(glm::radians(fov), WIDTH / (float)HEIGHT, 0.1f, 100.0f);
 
         // Moving the world
@@ -640,17 +566,24 @@ int main() {
         model = glm::scale(model, glm::vec3(1.5f, 0.3f, 3.0f));
         glm::mat4 mvp = proj * view * model;
 
-		// Set the MVP matrix in the shader
+        // Set the MVP matrix in the shader
         GLuint mvpLoc = glGetUniformLocation(shaderProgram, "MVP");
         glUniformMatrix4fv(mvpLoc, 1, GL_FALSE, glm::value_ptr(mvp));
 
-		// Render the parallelepiped
+        // Render the parallelepiped
         glBindVertexArray(VAO);
         glDrawArrays(GL_TRIANGLES, 0, 36);
 
-		// Render the sphere
-        glBindVertexArray(sphereVAO);
-        glDrawArrays(GL_TRIANGLES, 1, 36);
+        // Render the balls
+        // Update the function call to include the required arguments for the Render method.  
+        for (size_t i = 0; i < bolas.size(); ++i) {
+            glm::mat4 ballModel = glm::translate(glm::mat4(1.0f), posicoesBolas[i]);
+            ballModel = glm::scale(ballModel, glm::vec3(0.2f)); // Scale the ball  
+            glm::mat4 ballMVP = proj * view * ballModel;
+
+            // Pass the required arguments to the Render method  
+            bolas[i].Render(posicoesBolas[i], glm::vec3(0.0f), bolas[i].GetShaderProgram(), ballMVP);
+        }
 
         // --- Minimap Render ---
         // Calculate minimap viewport size & position (top-right corner)
@@ -701,16 +634,12 @@ int main() {
         glBindVertexArray(VAO);
         glDrawArrays(GL_TRIANGLES, 0, 36);
 
-        // Draw balls again
-        glBindVertexArray(sphereVAO);
-        glDrawArrays(GL_TRIANGLES, 1, 36);
-
         glDisable(GL_SCISSOR_TEST);
 
         // Reset viewport to full screen for next frame
         glViewport(0, 0, WIDTH, HEIGHT);
 
-		// Swap buffers and poll events
+        // Swap buffers and poll events
         glfwSwapBuffers(window);
         glfwPollEvents();
         };

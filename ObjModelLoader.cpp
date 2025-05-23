@@ -7,7 +7,7 @@
 
 namespace PoolGame3D {
 
-    ObjModelLoader::ObjModelLoader() : VAO(0), VBO(0), EBO(0), textureID(0) {}
+    ObjModelLoader::ObjModelLoader() : VAO(0), VBO(0), EBO(0), textureID(0), shaderProgram(0) {}
     ObjModelLoader::~ObjModelLoader() {
         glDeleteVertexArrays(1, &VAO);
         glDeleteBuffers(1, &VBO);
@@ -184,6 +184,10 @@ namespace PoolGame3D {
 
         stbi_image_free(data);
         return true;
+    }
+
+    GLuint ObjModelLoader::GetShaderProgram() const {
+        return shaderProgram;
     }
 
 } // namespace PoolGame3D
