@@ -1,0 +1,3 @@
+/Users/italofilho/Documents/dev/P3D/PoolGame3D/build/CMakeFiles/PROJECT_NAME.dir
+/Users/italofilho/Documents/dev/P3D/PoolGame3D/build/CMakeFiles/edit_cache.dir
+/Users/italofilho/Documents/dev/P3D/PoolGame3D/build/CMakeFiles/rebuild_cache.dir

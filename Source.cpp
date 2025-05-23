@@ -82,7 +82,7 @@
 * 
 * - Step 4 :
 * 	• Implement the movement animation (translation and rotation) of one of the billiard balls. This animation
-* 	should be triggered as soon as the user presses the “Space” key. The animation should stop when the ball
+* 	should be triggered as soon as the user presses the "Space" key. The animation should stop when the ball
 * 	hits another billiard ball or the table boundaries.
 */
 
@@ -92,24 +92,27 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
-#include <windows.h>
 #include <functional>
-#include "OpenGLLoader.h"
 #include <vector> // Add this include directive to resolve "std::vector"  
 
+#ifdef _WIN32
+#include <windows.h>
+#include "OpenGLLoader.h"
 #pragma comment(lib, "glew32.lib")
 #pragma comment(lib, "glfw3dll.lib")
 #pragma comment(lib, "opengl32.lib")
 
 // Disable warnings for deprecated OpenGL functions
 extern "C" {
-    // This is for NVIDIA Optimus
     __declspec(dllexport) DWORD NvOptimusEnablement = 0x00000001;
-    // This is for AMD PowerXpress
     __declspec(dllexport) DWORD AmdPowerXpressRequestHighPerformance = 0x00000001;
-    // This is for Intel Graphics
     __declspec(dllexport) DWORD IntelGraphicsRequestHighPerformance = 0x00000001;
 }
+#else
+// MacOS/Linux: não precisa desses includes/pragmas
+// Definir função dummy para LoadOpenGLLibrary
+inline bool LoadOpenGLLibrary() { return true; }
+#endif
 
 using namespace std;
 
@@ -260,6 +263,8 @@ static void FrameWork(
 
 // Function to create the parallelepiped mesh
 void CreateParallelepipedMesh(GLuint& VAO, GLuint& VBO) {
+    std::cout << "Iniciando criação do mesh..." << std::endl;
+    
     // Cada face com cor diferente: posição (vec3) + cor (vec3)
     GLfloat vertices[] = {
         // +X Direita Vermelho
@@ -311,13 +316,36 @@ void CreateParallelepipedMesh(GLuint& VAO, GLuint& VBO) {
         -0.5f, +0.5f, -0.5f, +0.0f, +1.0f, +1.0f
     };
 
-    glGenVertexArrays(1, &VAO);
-    glGenBuffers(1, &VBO);
+    std::cout << "Gerando VAO..." << std::endl;
+    GLuint tempVAO = 0;
+    glGenVertexArrays(1, &tempVAO);
+    if (tempVAO == 0) {
+        std::cerr << "Erro ao gerar VAO!" << std::endl;
+        return;
+    }
+    VAO = tempVAO;
+    std::cout << "VAO gerado: " << VAO << std::endl;
 
+    std::cout << "Gerando VBO..." << std::endl;
+    GLuint tempVBO = 0;
+    glGenBuffers(1, &tempVBO);
+    if (tempVBO == 0) {
+        std::cerr << "Erro ao gerar VBO!" << std::endl;
+        glDeleteVertexArrays(1, &VAO);
+        VAO = 0;
+        return;
+    }
+    VBO = tempVBO;
+    std::cout << "VBO gerado: " << VBO << std::endl;
+
+    std::cout << "Configurando VAO..." << std::endl;
     glBindVertexArray(VAO);
+    
+    std::cout << "Configurando VBO..." << std::endl;
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
+    std::cout << "Configurando atributos..." << std::endl;
     // Posição (vec3)
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (void*)0);
     glEnableVertexAttribArray(0);
@@ -326,12 +354,17 @@ void CreateParallelepipedMesh(GLuint& VAO, GLuint& VBO) {
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (void*)(3 * sizeof(GLfloat)));
     glEnableVertexAttribArray(1);
 
+    std::cout << "Limpando bindings..." << std::endl;
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
+    
+    std::cout << "Mesh criado com sucesso!" << std::endl;
 }
 
 // Function to create a sphere mesh
 void CreateSphereMesh(GLuint& VAO, GLuint& VBO, GLuint& EBO, int sectorCount = 36, int stackCount = 18) {
+    std::cout << "Iniciando criação da esfera..." << std::endl;
+    
     std::vector<GLfloat> vertices;
     std::vector<GLuint> indices;
 
@@ -386,19 +419,54 @@ void CreateSphereMesh(GLuint& VAO, GLuint& VBO, GLuint& EBO, int sectorCount = 3
         }
     }
 
-    // OpenGL buffers
-    glGenVertexArrays(1, &VAO);
-    glGenBuffers(1, &VBO);
-    glGenBuffers(1, &EBO);
+    std::cout << "Gerando VAO da esfera..." << std::endl;
+    GLuint tempVAO = 0;
+    glGenVertexArrays(1, &tempVAO);
+    if (tempVAO == 0) {
+        std::cerr << "Erro ao gerar VAO da esfera!" << std::endl;
+        return;
+    }
+    VAO = tempVAO;
+    std::cout << "VAO da esfera gerado: " << VAO << std::endl;
 
+    std::cout << "Gerando VBO da esfera..." << std::endl;
+    GLuint tempVBO = 0;
+    glGenBuffers(1, &tempVBO);
+    if (tempVBO == 0) {
+        std::cerr << "Erro ao gerar VBO da esfera!" << std::endl;
+        glDeleteVertexArrays(1, &VAO);
+        VAO = 0;
+        return;
+    }
+    VBO = tempVBO;
+    std::cout << "VBO da esfera gerado: " << VBO << std::endl;
+
+    std::cout << "Gerando EBO da esfera..." << std::endl;
+    GLuint tempEBO = 0;
+    glGenBuffers(1, &tempEBO);
+    if (tempEBO == 0) {
+        std::cerr << "Erro ao gerar EBO da esfera!" << std::endl;
+        glDeleteVertexArrays(1, &VAO);
+        glDeleteBuffers(1, &VBO);
+        VAO = 0;
+        VBO = 0;
+        return;
+    }
+    EBO = tempEBO;
+    std::cout << "EBO da esfera gerado: " << EBO << std::endl;
+
+    std::cout << "Configurando VAO da esfera..." << std::endl;
     glBindVertexArray(VAO);
 
+    std::cout << "Configurando VBO da esfera..." << std::endl;
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(GLfloat), vertices.data(), GL_STATIC_DRAW);
 
+    std::cout << "Configurando EBO da esfera..." << std::endl;
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(GLuint), indices.data(), GL_STATIC_DRAW);
 
+    std::cout << "Configurando atributos da esfera..." << std::endl;
     // Position
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (void*)0);
     glEnableVertexAttribArray(0);
@@ -407,7 +475,11 @@ void CreateSphereMesh(GLuint& VAO, GLuint& VBO, GLuint& EBO, int sectorCount = 3
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (void*)(3 * sizeof(GLfloat)));
     glEnableVertexAttribArray(1);
 
+    std::cout << "Limpando bindings da esfera..." << std::endl;
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
+    
+    std::cout << "Esfera criada com sucesso!" << std::endl;
 }
 
 void MouseButtonCallback(GLFWwindow* window, int button, int action, int mods) {
@@ -442,107 +514,128 @@ void MouseCallback(GLFWwindow* window, double xpos, double ypos) {
 
 // main function
 int main() {
+    std::cout << "Iniciando aplicação..." << std::endl;
+    
+    if (!glfwInit()) {
+        std::cerr << "Falha ao inicializar GLFW!" << std::endl;
+        return -1;
+    }
+    std::cout << "GLFW inicializado com sucesso!" << std::endl;
 
-    // Initialize OpenGL context
-    GLFWwindow* window = nullptr;
+    // Configurar hints do GLFW
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+    glfwWindowHint(GLFW_COCOA_CHDIR_RESOURCES, GLFW_TRUE);
+    glfwWindowHint(GLFW_COCOA_RETINA_FRAMEBUFFER, GLFW_TRUE);
 
-    // Set up window size
-    const int WIDTH = 800;
-    const int HEIGHT = 600;
+    std::cout << "Criando janela..." << std::endl;
+    GLFWwindow* window = glfwCreateWindow(800, 600, "Pool Game 3D", NULL, NULL);
+    if (!window) {
+        std::cerr << "Falha ao criar janela GLFW!" << std::endl;
+        glfwTerminate();
+        return -1;
+    }
+    std::cout << "Janela criada com sucesso!" << std::endl;
 
-    // Set up window title
-    const char* TITLE = "3D Pool Game";
+    glfwMakeContextCurrent(window);
+    std::cout << "Contexto OpenGL criado!" << std::endl;
 
-    // Set up OpenGL context
-    OpenGL_Context context;
+    // Inicializar GLEW
+    glewExperimental = GL_TRUE;
+    GLenum err = glewInit();
+    if (err != GLEW_OK) {
+        std::cerr << "Falha ao inicializar GLEW: " << glewGetErrorString(err) << std::endl;
+        glfwDestroyWindow(window);
+        glfwTerminate();
+        return -1;
+    }
+    std::cout << "GLEW inicializado com sucesso!" << std::endl;
+    std::cout << "Versão do OpenGL: " << glGetString(GL_VERSION) << std::endl;
+    std::cout << "Vendor do OpenGL: " << glGetString(GL_VENDOR) << std::endl;
+    std::cout << "Renderer do OpenGL: " << glGetString(GL_RENDERER) << std::endl;
+
+    // Verificar se as funções OpenGL estão disponíveis
+    std::cout << "Verificando funções OpenGL..." << std::endl;
+    if (!glfwGetProcAddress("glGenVertexArrays")) {
+        std::cerr << "glGenVertexArrays não está disponível!" << std::endl;
+        return -1;
+    }
+    if (!glfwGetProcAddress("glBindVertexArray")) {
+        std::cerr << "glBindVertexArray não está disponível!" << std::endl;
+        return -1;
+    }
+    if (!glfwGetProcAddress("glGenBuffers")) {
+        std::cerr << "glGenBuffers não está disponível!" << std::endl;
+        return -1;
+    }
+    std::cout << "Funções OpenGL verificadas." << std::endl;
+
+    glfwSetCursorPos(window, 800 * 0.5f, 600 * 0.5f);
+    glfwSetMouseButtonCallback(window, MouseButtonCallback);
+    glfwSetCursorPosCallback(window, MouseCallback);
+
+    std::cout << "Verificando OpenGL..." << std::endl;
+    if (!LoadOpenGLLibrary()) {
+        std::cerr << "Failed to load OpenGL library!" << std::endl;
+        glfwDestroyWindow(window);
+        glfwTerminate();
+        return -1;
+    }
+    std::cout << "OpenGL OK." << std::endl;
+
+    // Create a VAO and VBO for the parallelepiped
+    std::cout << "Criando VAO/VBO..." << std::endl;
+    VAO = 0;
+    VBO = 0;
+    CreateParallelepipedMesh(VAO, VBO);
+
+    // Create a sphere mesh
+    std::cout << "Criando esfera..." << std::endl;
+    CreateSphereMesh(sphereVAO, sphereVBO, sphereEBO);
+
+    if (VAO == 0) {
+        std::cerr << "Erro ao criar o VAO!" << std::endl;
+        return -1;
+    }
+    std::cout << "Criando shader..." << std::endl;
+    shaderProgram = CreateShaderProgram();
+
+    if (shaderProgram == 0) {
+        std::cerr << "Erro ao criar o shader program!" << std::endl;
+        return -1;
+    }
+    std::cout << "Shader criado." << std::endl;
+
+    // Initialize gl functions
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
+    glFrontFace(GL_CCW);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    // Set up input modes (inputs events)
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+    glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
+    glfwSetInputMode(window, GLFW_STICKY_MOUSE_BUTTONS, GL_TRUE);
+    //glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_CAPTURED);
+    glfwSetKeyCallback(window, keyCallback);
+
+    // Set up the viewport and projection matrix
+    glViewport(0, 0, 800, 600);
+    // Set up the projection matrix
+
+    // glMatrixMode(GL_PROJECTION);
+    // Set the projection matrix to identity
+    
+    glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 
     // Start function
     auto Start = [&]() {
-
-        // Checks if OpenGL is initialized
-        if (!glfwInit()) {
-            std::cerr << "Failed to initialize GLFW!" << std::endl;
-            return -1;
-        }
-
-        // Set up hints for OpenGL context
-        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3); 
-        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-        glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-        
-        // Creates a window:
-        // - size (WIDTH x HEIGHT)
-        // - title (TITLE)
-        // - monitor (monitor default)
-        // - windowed mode (window)
-        window = glfwCreateWindow(WIDTH, HEIGHT, TITLE, nullptr, nullptr);
-        
-        if (!window) {
-            std::cerr << "Failed to create GLFW window!" << std::endl;
-            glfwTerminate();
-            return -1;
-        }
-
-        glfwMakeContextCurrent(window);
-        glfwSetCursorPos(window, WIDTH * 0.5f, HEIGHT * 0.5f);
-        glfwSetMouseButtonCallback(window, MouseButtonCallback);
-        glfwSetCursorPosCallback(window, MouseCallback);
-
-        // Checks if OpenGL Library is loaded
-        if (!LoadOpenGLLibrary()) {
-            std::cerr << "Failed to load OpenGL library!" << std::endl;
-            glfwDestroyWindow(window);
-            glfwTerminate();
-            return -1;
-        }
-
-        glewExperimental = GL_TRUE; 
-        if (glewInit() != GLEW_OK) {
-            std::cerr << "Failed to initialize GLEW!" << std::endl;
-            return -1;
-        }
-
-		// Create a VAO and VBO for the parallelepiped
-        CreateParallelepipedMesh(VAO, VBO);
-
-		// Create a sphere mesh
-        CreateSphereMesh(sphereVAO, sphereVBO, sphereEBO);
-
-        if (VAO == 0) {
-            std::cerr << "Erro ao criar o VAO!" << std::endl;
-            return -1;
-        }
-        shaderProgram = CreateShaderProgram();
-
-        if (shaderProgram == 0) {
-            std::cerr << "Erro ao criar o shader program!" << std::endl;
-            return -1;
-        }
-
-        // Initialize gl functions
-        glEnable(GL_DEPTH_TEST);
-        glEnable(GL_CULL_FACE);
-        glCullFace(GL_BACK);
-        glFrontFace(GL_CCW);
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-        // Set up input modes (inputs events)
-        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-        glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
-        glfwSetInputMode(window, GLFW_STICKY_MOUSE_BUTTONS, GL_TRUE);
-        //glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_CAPTURED);
-        glfwSetKeyCallback(window, keyCallback);
-
-        // Set up the viewport and projection matrix
-        glViewport(0, 0, WIDTH, HEIGHT);
-        // Set up the projection matrix
-
-        // glMatrixMode(GL_PROJECTION);
-        // Set the projection matrix to identity
-        
-        glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-        };
+        // ... existing code ...
+    };
 
     // Input manager function
     auto InputManager = [&]() {
@@ -572,7 +665,7 @@ int main() {
         glUseProgram(shaderProgram);
 
 		// Set up the projection and view matrices
-        glm::mat4 proj = glm::perspective(glm::radians(45.0f), WIDTH / (float)HEIGHT, 0.1f, 100.0f);
+        glm::mat4 proj = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f);
 
         // Moving the world
         //glm::mat4 view = glm::lookAt(glm::vec3(2, 2, 2), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
