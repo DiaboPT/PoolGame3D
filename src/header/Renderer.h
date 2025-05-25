@@ -15,14 +15,14 @@ public:
 
     bool initialize();
     void render(const Camera& camera, const Mesh& tableMesh, const Mesh& ballMesh, const Window& window);
-    void renderMinimap(const Camera& camera, const Mesh& tableMesh, const Mesh& ballMesh);
+    void renderMinimap(const Camera& camera, const Mesh& tableMesh, const Mesh& ballMesh, const Window& window);
 
 private:
     PoolGame3D::Shader mainShader;
     PoolGame3D::Shader minimapShader;
     
     void setupMainViewport();
-    void setupMinimapViewport();
+    void setupMinimapViewport(const Window& window);
 };
 
 } // namespace PoolGame3D

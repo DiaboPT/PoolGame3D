@@ -55,21 +55,26 @@ void Renderer::render(const Camera& camera, const Mesh& tableMesh, const Mesh& b
     ballMesh.render();
 }
 
-void Renderer::renderMinimap(const Camera& camera, const Mesh& tableMesh, const Mesh& ballMesh) {
-    setupMinimapViewport();
+void Renderer::renderMinimap(const Camera& camera, const Mesh& tableMesh, const Mesh& ballMesh, const Window& window) {
+    setupMinimapViewport(window);
     
-    // Exemplo de renderização do minimapa (viewport reduzido)
-    int miniW = 200, miniH = 150, miniX = 600, miniY = 450;
-    glViewport(miniX, miniY, miniW, miniH);
-    glEnable(GL_SCISSOR_TEST);
-    glScissor(miniX, miniY, miniW, miniH);
+    // Obtém as dimensões da janela
+    int windowWidth, windowHeight;
+    glfwGetFramebufferSize(window.getHandle(), &windowWidth, &windowHeight);
+    
+    float minimapWidth = windowWidth * 0.2f;
+    float minimapHeight = minimapWidth * 1.0f;
+    int minimapX = windowWidth - minimapWidth - 10;
+    int minimapY = 10;
+    glViewport(minimapX, minimapY, minimapWidth, minimapHeight);
+    glScissor(minimapX, minimapY, minimapWidth, minimapHeight);
     glClear(GL_DEPTH_BUFFER_BIT);
     
     minimapShader.use();
     
-    // Matrizes para top-down
-    glm::mat4 topView = glm::lookAt(glm::vec3(0,5,0), glm::vec3(0,0,0), glm::vec3(0,0,-1));
-    glm::mat4 topProj = glm::ortho(-2.0f,2.0f,-2.0f,2.0f,0.1f,100.0f);
+    // Ajusta a matriz de projeção para manter a proporção correta da mesa
+    glm::mat4 topView = glm::lookAt(glm::vec3(0, 5, 0), glm::vec3(0, 0, 0), glm::vec3(0, 0, -1));
+    glm::mat4 topProj = glm::ortho(-1.5f, 1.5f, -0.75f, 0.75f, 0.1f, 100.0f);
     glm::mat4 mvp = topProj * topView * glm::mat4(1.0f);
     
     minimapShader.setMat4("MVP", mvp);
@@ -84,6 +89,14 @@ void Renderer::setupMainViewport() {
     glViewport(0, 0, 800, 600);
 }
 
-void Renderer::setupMinimapViewport() {
-    glViewport(600, 450, 200, 150);
+void Renderer::setupMinimapViewport(const Window& window) {
+    int windowWidth, windowHeight;
+    glfwGetFramebufferSize(window.getHandle(), &windowWidth, &windowHeight);
+    
+    float minimapWidth = windowWidth * 0.2f;
+    float minimapHeight = minimapWidth * 0.5f; // proporção 2:1 (3:1.5)
+    int minimapX = windowWidth - minimapWidth - 10;
+    int minimapY = 10;
+    
+    glViewport(minimapX, minimapY, minimapWidth, minimapHeight);
 } 

@@ -131,5 +131,5 @@ void App::render() {
     renderer.render(camera, tableMesh, ballMesh, window);
     
     // Renderiza o minimapa
-    renderer.renderMinimap(camera, tableMesh, ballMesh);
+    renderer.renderMinimap(camera, tableMesh, ballMesh, window);
 } 
