@@ -117,41 +117,281 @@ depend:
 .PHONY : depend
 
 #=============================================================================
-# Target rules for targets named PROJECT_NAME
+# Target rules for targets named PoolGame3D
 
 # Build rule for target.
-PROJECT_NAME: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 PROJECT_NAME
-.PHONY : PROJECT_NAME
+PoolGame3D: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 PoolGame3D
+.PHONY : PoolGame3D
 
 # fast build rule for target.
-PROJECT_NAME/fast:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/PROJECT_NAME.dir/build.make CMakeFiles/PROJECT_NAME.dir/build
-.PHONY : PROJECT_NAME/fast
+PoolGame3D/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/PoolGame3D.dir/build.make CMakeFiles/PoolGame3D.dir/build
+.PHONY : PoolGame3D/fast
 
-Source.o: Source.cpp.o
-.PHONY : Source.o
+src/Main.o: src/Main.cpp.o
+.PHONY : src/Main.o
 
 # target to build an object file
-Source.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/PROJECT_NAME.dir/build.make CMakeFiles/PROJECT_NAME.dir/Source.cpp.o
-.PHONY : Source.cpp.o
+src/Main.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/PoolGame3D.dir/build.make CMakeFiles/PoolGame3D.dir/src/Main.cpp.o
+.PHONY : src/Main.cpp.o
 
-Source.i: Source.cpp.i
-.PHONY : Source.i
+src/Main.i: src/Main.cpp.i
+.PHONY : src/Main.i
 
 # target to preprocess a source file
-Source.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/PROJECT_NAME.dir/build.make CMakeFiles/PROJECT_NAME.dir/Source.cpp.i
-.PHONY : Source.cpp.i
+src/Main.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/PoolGame3D.dir/build.make CMakeFiles/PoolGame3D.dir/src/Main.cpp.i
+.PHONY : src/Main.cpp.i
 
-Source.s: Source.cpp.s
-.PHONY : Source.s
+src/Main.s: src/Main.cpp.s
+.PHONY : src/Main.s
 
 # target to generate assembly for a file
-Source.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/PROJECT_NAME.dir/build.make CMakeFiles/PROJECT_NAME.dir/Source.cpp.s
-.PHONY : Source.cpp.s
+src/Main.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/PoolGame3D.dir/build.make CMakeFiles/PoolGame3D.dir/src/Main.cpp.s
+.PHONY : src/Main.cpp.s
+
+src/common/App.o: src/common/App.cpp.o
+.PHONY : src/common/App.o
+
+# target to build an object file
+src/common/App.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/PoolGame3D.dir/build.make CMakeFiles/PoolGame3D.dir/src/common/App.cpp.o
+.PHONY : src/common/App.cpp.o
+
+src/common/App.i: src/common/App.cpp.i
+.PHONY : src/common/App.i
+
+# target to preprocess a source file
+src/common/App.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/PoolGame3D.dir/build.make CMakeFiles/PoolGame3D.dir/src/common/App.cpp.i
+.PHONY : src/common/App.cpp.i
+
+src/common/App.s: src/common/App.cpp.s
+.PHONY : src/common/App.s
+
+# target to generate assembly for a file
+src/common/App.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/PoolGame3D.dir/build.make CMakeFiles/PoolGame3D.dir/src/common/App.cpp.s
+.PHONY : src/common/App.cpp.s
+
+src/common/Camera.o: src/common/Camera.cpp.o
+.PHONY : src/common/Camera.o
+
+# target to build an object file
+src/common/Camera.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/PoolGame3D.dir/build.make CMakeFiles/PoolGame3D.dir/src/common/Camera.cpp.o
+.PHONY : src/common/Camera.cpp.o
+
+src/common/Camera.i: src/common/Camera.cpp.i
+.PHONY : src/common/Camera.i
+
+# target to preprocess a source file
+src/common/Camera.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/PoolGame3D.dir/build.make CMakeFiles/PoolGame3D.dir/src/common/Camera.cpp.i
+.PHONY : src/common/Camera.cpp.i
+
+src/common/Camera.s: src/common/Camera.cpp.s
+.PHONY : src/common/Camera.s
+
+# target to generate assembly for a file
+src/common/Camera.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/PoolGame3D.dir/build.make CMakeFiles/PoolGame3D.dir/src/common/Camera.cpp.s
+.PHONY : src/common/Camera.cpp.s
+
+src/common/InputManager.o: src/common/InputManager.cpp.o
+.PHONY : src/common/InputManager.o
+
+# target to build an object file
+src/common/InputManager.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/PoolGame3D.dir/build.make CMakeFiles/PoolGame3D.dir/src/common/InputManager.cpp.o
+.PHONY : src/common/InputManager.cpp.o
+
+src/common/InputManager.i: src/common/InputManager.cpp.i
+.PHONY : src/common/InputManager.i
+
+# target to preprocess a source file
+src/common/InputManager.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/PoolGame3D.dir/build.make CMakeFiles/PoolGame3D.dir/src/common/InputManager.cpp.i
+.PHONY : src/common/InputManager.cpp.i
+
+src/common/InputManager.s: src/common/InputManager.cpp.s
+.PHONY : src/common/InputManager.s
+
+# target to generate assembly for a file
+src/common/InputManager.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/PoolGame3D.dir/build.make CMakeFiles/PoolGame3D.dir/src/common/InputManager.cpp.s
+.PHONY : src/common/InputManager.cpp.s
+
+src/common/Mesh.o: src/common/Mesh.cpp.o
+.PHONY : src/common/Mesh.o
+
+# target to build an object file
+src/common/Mesh.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/PoolGame3D.dir/build.make CMakeFiles/PoolGame3D.dir/src/common/Mesh.cpp.o
+.PHONY : src/common/Mesh.cpp.o
+
+src/common/Mesh.i: src/common/Mesh.cpp.i
+.PHONY : src/common/Mesh.i
+
+# target to preprocess a source file
+src/common/Mesh.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/PoolGame3D.dir/build.make CMakeFiles/PoolGame3D.dir/src/common/Mesh.cpp.i
+.PHONY : src/common/Mesh.cpp.i
+
+src/common/Mesh.s: src/common/Mesh.cpp.s
+.PHONY : src/common/Mesh.s
+
+# target to generate assembly for a file
+src/common/Mesh.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/PoolGame3D.dir/build.make CMakeFiles/PoolGame3D.dir/src/common/Mesh.cpp.s
+.PHONY : src/common/Mesh.cpp.s
+
+src/common/ObjModelLoader.o: src/common/ObjModelLoader.cpp.o
+.PHONY : src/common/ObjModelLoader.o
+
+# target to build an object file
+src/common/ObjModelLoader.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/PoolGame3D.dir/build.make CMakeFiles/PoolGame3D.dir/src/common/ObjModelLoader.cpp.o
+.PHONY : src/common/ObjModelLoader.cpp.o
+
+src/common/ObjModelLoader.i: src/common/ObjModelLoader.cpp.i
+.PHONY : src/common/ObjModelLoader.i
+
+# target to preprocess a source file
+src/common/ObjModelLoader.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/PoolGame3D.dir/build.make CMakeFiles/PoolGame3D.dir/src/common/ObjModelLoader.cpp.i
+.PHONY : src/common/ObjModelLoader.cpp.i
+
+src/common/ObjModelLoader.s: src/common/ObjModelLoader.cpp.s
+.PHONY : src/common/ObjModelLoader.s
+
+# target to generate assembly for a file
+src/common/ObjModelLoader.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/PoolGame3D.dir/build.make CMakeFiles/PoolGame3D.dir/src/common/ObjModelLoader.cpp.s
+.PHONY : src/common/ObjModelLoader.cpp.s
+
+src/common/OpenGLLoader.o: src/common/OpenGLLoader.cpp.o
+.PHONY : src/common/OpenGLLoader.o
+
+# target to build an object file
+src/common/OpenGLLoader.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/PoolGame3D.dir/build.make CMakeFiles/PoolGame3D.dir/src/common/OpenGLLoader.cpp.o
+.PHONY : src/common/OpenGLLoader.cpp.o
+
+src/common/OpenGLLoader.i: src/common/OpenGLLoader.cpp.i
+.PHONY : src/common/OpenGLLoader.i
+
+# target to preprocess a source file
+src/common/OpenGLLoader.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/PoolGame3D.dir/build.make CMakeFiles/PoolGame3D.dir/src/common/OpenGLLoader.cpp.i
+.PHONY : src/common/OpenGLLoader.cpp.i
+
+src/common/OpenGLLoader.s: src/common/OpenGLLoader.cpp.s
+.PHONY : src/common/OpenGLLoader.s
+
+# target to generate assembly for a file
+src/common/OpenGLLoader.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/PoolGame3D.dir/build.make CMakeFiles/PoolGame3D.dir/src/common/OpenGLLoader.cpp.s
+.PHONY : src/common/OpenGLLoader.cpp.s
+
+src/common/Renderer.o: src/common/Renderer.cpp.o
+.PHONY : src/common/Renderer.o
+
+# target to build an object file
+src/common/Renderer.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/PoolGame3D.dir/build.make CMakeFiles/PoolGame3D.dir/src/common/Renderer.cpp.o
+.PHONY : src/common/Renderer.cpp.o
+
+src/common/Renderer.i: src/common/Renderer.cpp.i
+.PHONY : src/common/Renderer.i
+
+# target to preprocess a source file
+src/common/Renderer.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/PoolGame3D.dir/build.make CMakeFiles/PoolGame3D.dir/src/common/Renderer.cpp.i
+.PHONY : src/common/Renderer.cpp.i
+
+src/common/Renderer.s: src/common/Renderer.cpp.s
+.PHONY : src/common/Renderer.s
+
+# target to generate assembly for a file
+src/common/Renderer.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/PoolGame3D.dir/build.make CMakeFiles/PoolGame3D.dir/src/common/Renderer.cpp.s
+.PHONY : src/common/Renderer.cpp.s
+
+src/common/Shader.o: src/common/Shader.cpp.o
+.PHONY : src/common/Shader.o
+
+# target to build an object file
+src/common/Shader.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/PoolGame3D.dir/build.make CMakeFiles/PoolGame3D.dir/src/common/Shader.cpp.o
+.PHONY : src/common/Shader.cpp.o
+
+src/common/Shader.i: src/common/Shader.cpp.i
+.PHONY : src/common/Shader.i
+
+# target to preprocess a source file
+src/common/Shader.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/PoolGame3D.dir/build.make CMakeFiles/PoolGame3D.dir/src/common/Shader.cpp.i
+.PHONY : src/common/Shader.cpp.i
+
+src/common/Shader.s: src/common/Shader.cpp.s
+.PHONY : src/common/Shader.s
+
+# target to generate assembly for a file
+src/common/Shader.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/PoolGame3D.dir/build.make CMakeFiles/PoolGame3D.dir/src/common/Shader.cpp.s
+.PHONY : src/common/Shader.cpp.s
+
+src/common/ShadersSources.o: src/common/ShadersSources.cpp.o
+.PHONY : src/common/ShadersSources.o
+
+# target to build an object file
+src/common/ShadersSources.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/PoolGame3D.dir/build.make CMakeFiles/PoolGame3D.dir/src/common/ShadersSources.cpp.o
+.PHONY : src/common/ShadersSources.cpp.o
+
+src/common/ShadersSources.i: src/common/ShadersSources.cpp.i
+.PHONY : src/common/ShadersSources.i
+
+# target to preprocess a source file
+src/common/ShadersSources.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/PoolGame3D.dir/build.make CMakeFiles/PoolGame3D.dir/src/common/ShadersSources.cpp.i
+.PHONY : src/common/ShadersSources.cpp.i
+
+src/common/ShadersSources.s: src/common/ShadersSources.cpp.s
+.PHONY : src/common/ShadersSources.s
+
+# target to generate assembly for a file
+src/common/ShadersSources.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/PoolGame3D.dir/build.make CMakeFiles/PoolGame3D.dir/src/common/ShadersSources.cpp.s
+.PHONY : src/common/ShadersSources.cpp.s
+
+src/common/Window.o: src/common/Window.cpp.o
+.PHONY : src/common/Window.o
+
+# target to build an object file
+src/common/Window.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/PoolGame3D.dir/build.make CMakeFiles/PoolGame3D.dir/src/common/Window.cpp.o
+.PHONY : src/common/Window.cpp.o
+
+src/common/Window.i: src/common/Window.cpp.i
+.PHONY : src/common/Window.i
+
+# target to preprocess a source file
+src/common/Window.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/PoolGame3D.dir/build.make CMakeFiles/PoolGame3D.dir/src/common/Window.cpp.i
+.PHONY : src/common/Window.cpp.i
+
+src/common/Window.s: src/common/Window.cpp.s
+.PHONY : src/common/Window.s
+
+# target to generate assembly for a file
+src/common/Window.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/PoolGame3D.dir/build.make CMakeFiles/PoolGame3D.dir/src/common/Window.cpp.s
+.PHONY : src/common/Window.cpp.s
 
 # Help Target
 help:
@@ -161,10 +401,40 @@ help:
 	@echo "... depend"
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
-	@echo "... PROJECT_NAME"
-	@echo "... Source.o"
-	@echo "... Source.i"
-	@echo "... Source.s"
+	@echo "... PoolGame3D"
+	@echo "... src/Main.o"
+	@echo "... src/Main.i"
+	@echo "... src/Main.s"
+	@echo "... src/common/App.o"
+	@echo "... src/common/App.i"
+	@echo "... src/common/App.s"
+	@echo "... src/common/Camera.o"
+	@echo "... src/common/Camera.i"
+	@echo "... src/common/Camera.s"
+	@echo "... src/common/InputManager.o"
+	@echo "... src/common/InputManager.i"
+	@echo "... src/common/InputManager.s"
+	@echo "... src/common/Mesh.o"
+	@echo "... src/common/Mesh.i"
+	@echo "... src/common/Mesh.s"
+	@echo "... src/common/ObjModelLoader.o"
+	@echo "... src/common/ObjModelLoader.i"
+	@echo "... src/common/ObjModelLoader.s"
+	@echo "... src/common/OpenGLLoader.o"
+	@echo "... src/common/OpenGLLoader.i"
+	@echo "... src/common/OpenGLLoader.s"
+	@echo "... src/common/Renderer.o"
+	@echo "... src/common/Renderer.i"
+	@echo "... src/common/Renderer.s"
+	@echo "... src/common/Shader.o"
+	@echo "... src/common/Shader.i"
+	@echo "... src/common/Shader.s"
+	@echo "... src/common/ShadersSources.o"
+	@echo "... src/common/ShadersSources.i"
+	@echo "... src/common/ShadersSources.s"
+	@echo "... src/common/Window.o"
+	@echo "... src/common/Window.i"
+	@echo "... src/common/Window.s"
 .PHONY : help
 
 
