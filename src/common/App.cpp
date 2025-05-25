@@ -31,7 +31,7 @@ bool App::initialize() {
     glfwWindowHint(GLFW_COCOA_CHDIR_RESOURCES, GLFW_TRUE);
     glfwWindowHint(GLFW_COCOA_RETINA_FRAMEBUFFER, GLFW_TRUE);
 
-    if (!window.initialize(800, 600, "Pool Game 3D")) {
+    if (!window.initialize(1200, 1000, "Pool Game 3D")) {
         std::cerr << "Falha ao criar janela GLFW!" << std::endl;
         glfwTerminate();
         return false;

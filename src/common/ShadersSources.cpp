@@ -6,21 +6,58 @@ namespace PoolGame3D {
 const char* vertexShaderSource = R"(
     #version 330 core
     layout(location = 0) in vec3 aPos;
-    layout(location = 1) in vec3 aColor;
-    out vec3 ourColor;
+    layout(location = 1) in vec3 aNormal;
+    out vec3 faceNormal;
+    out vec3 vertexPos;
     uniform mat4 MVP;
     void main() {
       gl_Position = MVP * vec4(aPos, 1.0);
-      ourColor = aColor;
+      faceNormal = aNormal;
+      vertexPos = aPos;
     }
 )";
 
 const char* fragmentShaderSource = R"(
     #version 330 core
-    in vec3 ourColor;
+    in vec3 faceNormal;
+    in vec3 vertexPos;
     out vec4 FragColor;
+
+    // Cores organizadas
+    vec3 green = vec3(0.22, 0.45, 0.22); // verde (Cima)
+    vec3 brown1 = vec3(0.30, 0.18, 0.08); // marrom 1 (Direita)
+    vec3 brown2 = vec3(0.45, 0.28, 0.10); // marrom 2 (Esquerda)
+    vec3 brown3 = vec3(0.36, 0.22, 0.09); // marrom 3 (Baixo)
+    vec3 brown4 = vec3(0.40, 0.25, 0.12); // marrom 4 (Frente)
+    vec3 brown5 = vec3(0.32, 0.20, 0.07); // marrom 5 (Trás)
+
     void main() {
-      FragColor = vec4(ourColor, 1.0);
+        vec3 n = normalize(faceNormal);
+        vec3 color;
+
+        if (distance(n, vec3(0.0, 1.0, 0.0)) < 0.1) {
+            color = green; // verde (Cima)
+        } else if (distance(n, vec3(1.0, 0.0, 0.0)) < 0.1) {
+            color = brown1; // marrom 1 (Direita)
+        } else if (distance(n, vec3(-1.0, 0.0, 0.0)) < 0.1) {
+            color = brown2; // marrom 2 (Esquerda)
+        } else if (distance(n, vec3(0.0, -1.0, 0.0)) < 0.1) {
+            color = brown3; // marrom 3 (Baixo)
+        } else if (distance(n, vec3(0.0, 0.0, 1.0)) < 0.1) {
+            color = brown4; // marrom 4 (Frente)
+        } else if (distance(n, vec3(0.0, 0.0, -1.0)) < 0.1) {
+            color = brown5; // marrom 5 (Trás)
+        } else {
+            color = vec3(1,0,1); // debug
+        }
+
+        // Sombra nas pontas: mistura com cinza conforme distância do centro
+        float dist = length(vertexPos); // 0 no centro, ~0.87 nos cantos
+        float sombra = smoothstep(0.5, 0.87, dist); // começa a escurecer a partir de 0.5
+        vec3 gray = vec3(0.25); // tom de cinza para desaturar
+        color = mix(color, gray, sombra * 0.6); // 0.6 controla a força da sombra
+
+        FragColor = vec4(color, 1.0);
     }
 )";
 

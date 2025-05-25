@@ -23,7 +23,9 @@ bool Renderer::initialize() {
 }
 
 void Renderer::render(const Camera& camera, const Mesh& tableMesh, const Mesh& ballMesh, const Window& window) {
-    setupMainViewport();
+    int fbWidth, fbHeight;
+    glfwGetFramebufferSize(window.getHandle(), &fbWidth, &fbHeight);
+    glViewport(0, 0, fbWidth, fbHeight);
     
     // Limpa a tela
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -40,7 +42,7 @@ void Renderer::render(const Camera& camera, const Mesh& tableMesh, const Mesh& b
     
     int width, height;
     glfwGetFramebufferSize(window.getHandle(), &width, &height);
-    float aspect = width / (float)height;
+    float aspect = fbWidth / (float)fbHeight;
     glm::mat4 proj = camera.getProjectionMatrix(aspect);
     glm::mat4 mvp = proj * view * model;
     
