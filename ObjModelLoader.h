@@ -27,6 +27,9 @@ namespace PoolGame3D {
       // New method to retrieve the shader program
       GLuint GetShaderProgram() const;
 
+	  // New method to set the shader program
+	  void SetShaderProgram(GLuint program);
+
   private:  
       // Dados do modelo  
       std::vector<float> vertices; // pos(3), normal(3), texcoord(2)  

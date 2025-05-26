@@ -50,6 +50,7 @@ namespace PoolGame3D {
         glEnableVertexAttribArray(2);
 
         glBindVertexArray(0);
+
     }
 
     void ObjModelLoader::Render(const glm::vec3& position, const glm::vec3& orientation, GLuint shaderProgram, const glm::mat4& viewProj) {
@@ -188,6 +189,11 @@ namespace PoolGame3D {
 
     GLuint ObjModelLoader::GetShaderProgram() const {
         return shaderProgram;
+    }
+
+    void ObjModelLoader::SetShaderProgram(GLuint program)
+    {
+		shaderProgram = program;
     }
 
 } // namespace PoolGame3D

@@ -213,6 +213,25 @@ GLuint CreateShaderProgram() {
     return program;
 }
 
+GLuint CreateBallShaderProgram() {
+    GLuint vertex = CompileShader(GL_VERTEX_SHADER, vertexShaderTexture);
+    GLuint fragment = CompileShader(GL_FRAGMENT_SHADER, fragmentShaderTexture);
+    GLuint program = glCreateProgram();
+    glAttachShader(program, vertex);
+    glAttachShader(program, fragment);
+    glLinkProgram(program);
+    GLint success;
+    glGetProgramiv(program, GL_LINK_STATUS, &success);
+    if (!success) {
+        char infoLog[512];
+        glGetProgramInfoLog(program, 512, nullptr, infoLog);
+        std::cerr << "Ball Shader link error: " << infoLog << std::endl;
+    }
+    glDeleteShader(vertex);
+    glDeleteShader(fragment);
+    return program;
+}
+
 // Function to set up an Object
 struct OpenGL_Context {
     // Initialize the member variable 
@@ -420,6 +439,9 @@ int main() {
     // Set up OpenGL context
     OpenGL_Context context;
 
+    // Create shader program for balls
+    GLuint ballShader = 0;
+
     // Start function
     auto Start = [&]() {
 
@@ -463,6 +485,10 @@ int main() {
             return -1;
         }
 
+        // Now create shader programs
+        ballShader = CreateBallShaderProgram();
+        shaderProgram = CreateShaderProgram();
+
         // Create a VAO and VBO for the parallelepiped
         CreateParallelepipedMesh(VAO, VBO);
 
@@ -471,9 +497,6 @@ int main() {
             std::cerr << "Erro ao criar o VBO!" << std::endl;
             return -1;
         }
-
-        // shader program for the table
-        shaderProgram = CreateShaderProgram();
 
         // if shader program is not created
         if (shaderProgram == 0) {
@@ -485,10 +508,13 @@ int main() {
         for (int i = 1; i < 16; ++i) {
             ObjModelLoader ball;
             std::string path = "poolBalls/Ball" + std::to_string(i) + ".obj";
+            if (!ball.Load(path)) std::cerr << "Failed to load " << path << std::endl;
             ball.Load(path);
             ball.Install();
             std::string texturePath = "poolBalls/PoolBalluv" + std::to_string(i) + ".jpg";
+            if (!ball.LoadTexture(texturePath)) std::cerr << "Failed to load " << texturePath << std::endl;
             ball.LoadTexture(texturePath);
+            ball.SetShaderProgram(ballShader); // Set the shader program for the ball
             bolas.push_back(ball);
             posicoesBolas.push_back(glm::vec3(0.0f, i, 0.0f)); // Add the position of the ball
         }
@@ -575,13 +601,14 @@ int main() {
         glDrawArrays(GL_TRIANGLES, 0, 36);
 
         // Render the balls
+        glUseProgram(ballShader);
         // Update the function call to include the required arguments for the Render method.  
         for (size_t i = 0; i < bolas.size(); ++i) {
             glm::mat4 ballModel = glm::translate(glm::mat4(1.0f), posicoesBolas[i]);
             ballModel = glm::scale(ballModel, glm::vec3(0.2f)); // Scale the ball  
             glm::mat4 ballMVP = proj * view * ballModel;
 
-            // Pass the required arguments to the Render method  
+            // Pass the required arguments to the Render method
             bolas[i].Render(posicoesBolas[i], glm::vec3(0.0f), bolas[i].GetShaderProgram(), ballMVP);
         }
 
