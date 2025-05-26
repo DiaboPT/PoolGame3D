@@ -181,6 +181,8 @@ const char* fragmentShaderTexture = R"(
     }
 )";
 
+GLuint textureShaderProgram = 0;
+
 GLuint CompileShader(GLenum type, const char* src) {
     GLuint shader = glCreateShader(type);
     glShaderSource(shader, 1, &src, nullptr);
@@ -214,11 +216,34 @@ GLuint CreateShaderProgram() {
     return program;
 }
 
+GLuint CreateTextureShaderProgram() {
+    GLuint vertex = CompileShader(GL_VERTEX_SHADER, vertexShaderTexture);
+    GLuint fragment = CompileShader(GL_FRAGMENT_SHADER, fragmentShaderTexture);
+    GLuint program = glCreateProgram();
+
+    glAttachShader(program, vertex);
+    glAttachShader(program, fragment);
+    glLinkProgram(program);
+
+    GLint sucess;
+
+    glGetProgramiv(program, GL_LINK_STATUS, &sucess);
+    if (!sucess) {
+        char infoLog[512];
+        glGetProgramInfoLog(program, 512, nullptr, infoLog);
+        std::cerr << "Texture Shader link error" << infoLog << std::endl;
+    }
+
+    glDeleteShader(vertex);
+    glDeleteShader(fragment);
+    return program;
+}
+
 // Function to set up an Object
 struct OpenGL_Context {
     // Initialize the member variable 
     string* object_Window_Target = nullptr;
-    
+
     // 6 faces, 2 triangles/face, 3 vertices/triangle 
     static constexpr GLint numVertices = 6 * 2 * 3;
 
@@ -251,15 +276,6 @@ struct OpenGL_Context {
     TableMesh table;
 
 };
-
-// Function to handle key events
-static void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
-
-    // Se tecla 'Escape' premida
-    if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
-        glfwSetWindowShouldClose(window, true);
-
-}
 
 // Framework function
 static void FrameWork(
@@ -445,6 +461,14 @@ void CreateSphereMesh(GLuint& VAO, GLuint& VBO, GLuint& EBO, int sectorCount = 3
     glBindVertexArray(0);
 }
 
+#pragma region Callbacks
+/// <summary>
+/// Method to handle when mouse button is pressed
+/// </summary>
+/// <param name="window"></param>
+/// <param name="button"></param>
+/// <param name="action"></param>
+/// <param name="mods"></param>
 void MouseButtonCallback(GLFWwindow* window, int button, int action, int mods) {
     if (button == GLFW_MOUSE_BUTTON_LEFT) {
         if (action == GLFW_PRESS) {
@@ -457,6 +481,12 @@ void MouseButtonCallback(GLFWwindow* window, int button, int action, int mods) {
     }
 }
 
+/// <summary>
+/// Method to handle mouse position
+/// </summary>
+/// <param name="window"></param>
+/// <param name="xpos"></param>
+/// <param name="ypos"></param>
 void MouseCallback(GLFWwindow* window, double xpos, double ypos) {
     if (!isRotating) return;
 
@@ -475,6 +505,12 @@ void MouseCallback(GLFWwindow* window, double xpos, double ypos) {
     if (cameraPitch < 30.0f) cameraPitch = -30.0f;
 }
 
+/// <summary>
+/// Method to handle mouse scroll
+/// </summary>
+/// <param name="window"></param>
+/// <param name="xoffset"></param>
+/// <param name="yoffset"></param>
 void ScrollCallback(GLFWwindow* window, double xoffset, double yoffset) {
     fov -= (float)yoffset;
 
@@ -483,6 +519,24 @@ void ScrollCallback(GLFWwindow* window, double xoffset, double yoffset) {
     if (fov > 45.0f)
         fov = 45.0f;
 }
+
+/// <summary>
+/// Method to handle keyboard
+/// </summary>
+/// <param name="window"></param>
+/// <param name="key"></param>
+/// <param name="scancode"></param>
+/// <param name="action"></param>
+/// <param name="mods"></param>
+void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
+
+    // Se tecla 'Escape' premida
+    if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
+        glfwSetWindowShouldClose(window, true);
+
+}
+#pragma endregion
+
 
 // main function
 int main() {
@@ -552,6 +606,30 @@ int main() {
 
 		// Create a sphere mesh
         CreateSphereMesh(sphereVAO, sphereVBO, sphereEBO);
+
+        // Loading the balls
+        for (int i = 1; i <= 15; ++i)
+        {
+            ObjModelLoader bola;
+            std::string filename = "PoolBalls/Ball" + std::to_string(i) + ".obj";
+
+            if (bola.Load(filename)) {
+                bolas.push_back(bola);
+                posicoesBolas.push_back(glm::vec3(i * 0.6f, 0.5f, 0.0f));
+            }
+            else {
+                std::cerr << "Failed to load: " << filename << std::endl;
+            }
+
+            bola.Install();
+        }
+
+        textureShaderProgram = CreateTextureShaderProgram();
+        if (textureShaderProgram == 0) {
+            std::cerr << "Erro ao criar o texture shader program!" << std::endl;
+            return -1;
+        }
+
 
         if (VAO == 0) {
             std::cerr << "Erro ao criar o VAO!" << std::endl;
@@ -649,8 +727,16 @@ int main() {
         glDrawArrays(GL_TRIANGLES, 0, 36);
 
 		// Render the sphere
-        glBindVertexArray(sphereVAO);
-        glDrawArrays(GL_TRIANGLES, 1, 36);
+        glUseProgram(textureShaderProgram);
+        for (size_t i = 0; i < bolas.size(); ++i) {
+            glm::mat4 ballModel = glm::mat4(1.0f);
+            ballModel = glm::translate(ballModel, posicoesBolas[i]);
+            ballModel = glm::scale(ballModel, glm::vec3(0.1f)); // Scaling down the balls
+            glm::mat4 ballMVP = proj * view * ballModel;
+
+            bolas[i].Render(posicoesBolas[i], glm::vec3(0.0f), textureShaderProgram, proj* view);
+        }
+
 
         // --- Minimap Render ---
         // Calculate minimap viewport size & position (top-right corner)
@@ -697,13 +783,22 @@ int main() {
         glm::mat4 topMVP = topProjection * topView * topModel;
         glUniformMatrix4fv(mvpLoc, 1, GL_FALSE, glm::value_ptr(topMVP));
 
-        // Draw the table again in minimap
+        // Draw the table in minimap
         glBindVertexArray(VAO);
         glDrawArrays(GL_TRIANGLES, 0, 36);
 
-        // Draw balls again
-        glBindVertexArray(sphereVAO);
-        glDrawArrays(GL_TRIANGLES, 1, 36);
+        // Draw balls on minimap        
+        glUseProgram(textureShaderProgram);
+        for (size_t i = 0; i < bolas.size(); ++i) {
+            glm::mat4 ballModel = glm::mat4(1.0f);
+            ballModel = glm::translate(ballModel, posicoesBolas[i]);
+            ballModel = glm::scale(ballModel, glm::vec3(0.1f)); // Scale down the balls
+            glm::mat4 ballMVP = topProjection * topView * ballModel;
+
+            // Render each ball in minimap
+            bolas[i].Render(posicoesBolas[i], glm::vec3(0.0f), textureShaderProgram, topProjection * topView);
+        }
+
 
         glDisable(GL_SCISSOR_TEST);
 

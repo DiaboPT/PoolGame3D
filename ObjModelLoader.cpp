@@ -4,6 +4,9 @@
 #include <iostream>
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 namespace PoolGame3D {
 
@@ -75,40 +78,58 @@ namespace PoolGame3D {
     // Função simples para carregar .obj (apenas triangulos, 1 material, sem grupos)
     bool ObjModelLoader::LoadOBJ(const std::string& path, std::string& mtlFile) {
         std::ifstream file(path);
+        
         if (!file.is_open()) {
             std::cerr << "Erro ao abrir arquivo OBJ: " << path << std::endl;
             return false;
-        }
+        }        
 
         std::vector<glm::vec3> temp_positions;
         std::vector<glm::vec3> temp_normals;
         std::vector<glm::vec2> temp_texcoords;
         std::vector<unsigned int> vertexIndices, normalIndices, texcoordIndices;
 
+        // Error debug
+        bool hasNormals = false;
+        bool hasTextcoords = false;
+        bool hasFaces = false;
+        mtlFile.clear();
+
         std::string line;
         while (std::getline(file, line)) {
+            if (line.empty()) continue;
+
             std::istringstream iss(line);
             std::string prefix;
             iss >> prefix;
+                        
             if (prefix == "mtllib") {
-                iss >> mtlFile;
+                if (!(iss >> mtlFile))
+                    std::cerr << "Warning: MTL file declaration malformed in " << path << std::endl;
             }
-            else if (prefix == "v") {
+            else if (prefix == "v") { // Vertex position
                 glm::vec3 pos;
-                iss >> pos.x >> pos.y >> pos.z;
-                temp_positions.push_back(pos);
+                if (iss >> pos.x >> pos.y >> pos.z)
+                    temp_positions.push_back(pos);
             }
-            else if (prefix == "vn") {
+            else if (prefix == "vn") { // Vertex normal
                 glm::vec3 norm;
-                iss >> norm.x >> norm.y >> norm.z;
-                temp_normals.push_back(norm);
+                if (iss >> norm.x >> norm.y >> norm.z) {
+                    temp_normals.push_back(norm);
+                    hasNormals = true;
+                }
             }
-            else if (prefix == "vt") {
+            else if (prefix == "vt") { // Vertex coordinate
                 glm::vec2 tex;
-                iss >> tex.x >> tex.y;
-                temp_texcoords.push_back(tex);
+                if (iss >> tex.x >> tex.y) {
+                    temp_texcoords.push_back(tex);
+                    hasTextcoords = true;
+                }
             }
-            else if (prefix == "f") {
+            else if (prefix == "f") { // Face
+                hasFaces = true;
+                std::string vertexStr;
+
                 unsigned int v[3], t[3], n[3];
                 char slash;
                 for (int i = 0; i < 3; ++i) {
@@ -144,10 +165,14 @@ namespace PoolGame3D {
     // Função simples para carregar .mtl (apenas map_Kd)
     bool ObjModelLoader::LoadMTL(const std::string& path, std::string& textureFile) {
         std::ifstream file(path);
+
         if (!file.is_open()) {
             std::cerr << "Erro ao abrir arquivo MTL: " << path << std::endl;
             return false;
         }
+
+        std::cout << "Texture file: " << textureFile << std::endl;
+
         std::string line;
         while (std::getline(file, line)) {
             std::istringstream iss(line);
