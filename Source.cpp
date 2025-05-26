@@ -482,12 +482,12 @@ int main() {
         }
 
         // Load the rest of the balls
-        for (int i = 0; i <= 15; ++i) {
+        for (int i = 1; i < 16; ++i) {
             ObjModelLoader ball;
-            std::string path = "poolBalls/Ball" + std::to_string(i +1) + ".obj";
+            std::string path = "poolBalls/Ball" + std::to_string(i) + ".obj";
             ball.Load(path);
             ball.Install();
-            std::string texturePath = "poolBalls/PoolBalluv" + std::to_string(i + 1) + ".jpg";
+            std::string texturePath = "poolBalls/PoolBalluv" + std::to_string(i) + ".jpg";
             ball.LoadTexture(texturePath);
             bolas.push_back(ball);
             posicoesBolas.push_back(glm::vec3(0.0f, i, 0.0f)); // Add the position of the ball
