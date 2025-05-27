@@ -9,8 +9,8 @@ public:
     bool Load(const std::string obj_model_filepath);
     void Install();
     void Render(glm::vec3 position, glm::vec3 orientation);
+    void NormalizeToUnit();
 
-private:
     std::vector<glm::vec3> vertices;
     std::vector<glm::vec2> uvs;
     std::vector<glm::vec3> normals;

@@ -141,3 +141,17 @@ void ObjModelLoader::Render(glm::vec3 position, glm::vec3 orientation) {
     glDrawArrays(GL_TRIANGLES, 0, vertices.size());
     glBindVertexArray(0);
 }
+
+void ObjModelLoader::NormalizeToUnit() {
+    float maxAbs = 0.0f;
+    for (const auto& v : vertices) {
+        maxAbs = std::max(maxAbs, std::abs(v.x));
+        maxAbs = std::max(maxAbs, std::abs(v.y));
+        maxAbs = std::max(maxAbs, std::abs(v.z));
+    }
+    if (maxAbs > 0.0f) {
+        for (auto& v : vertices) {
+            v /= maxAbs;
+        }
+    }
+}

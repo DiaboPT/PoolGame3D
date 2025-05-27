@@ -49,5 +49,11 @@
     <None Include="shader.frag">
       <Filter>Shaders Files</Filter>
     </None>
+    <None Include="light.frag">
+      <Filter>Shaders Files</Filter>
+    </None>
+    <None Include="light.vert">
+      <Filter>Shaders Files</Filter>
+    </None>
   </ItemGroup>
 </Project>
