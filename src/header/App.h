@@ -9,6 +9,8 @@
 #include "Mesh.h"
 #include "ObjModelLoader.h"
 #include "Light.h"
+#include <vector>
+#include <memory>
 
 namespace PoolGame3D {
 
@@ -35,6 +37,8 @@ private:
     Mesh ballsMesh;
     Renderer renderer;
     Light sceneLight;
+    std::vector<std::shared_ptr<ObjModelLoader>> poolBalls;
+    std::vector<glm::vec3> ballPositions;
 };
 
 } // namespace PoolGame3D

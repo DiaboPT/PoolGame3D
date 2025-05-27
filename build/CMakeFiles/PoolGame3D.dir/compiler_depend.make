@@ -7195,6 +7195,92 @@ CMakeFiles/PoolGame3D.dir/src/common/ObjModelLoader.cpp.o: /Users/italofilho/Doc
   /Users/italofilho/Documents/dev/P3D/PoolGame3D/include/glm/ext/matrix_transform.hpp \
   /Users/italofilho/Documents/dev/P3D/PoolGame3D/include/glm/ext/matrix_transform.inl \
   /Users/italofilho/Documents/dev/P3D/PoolGame3D/include/glm/geometric.hpp \
+  /Users/italofilho/Documents/dev/P3D/PoolGame3D/include/glm/common.hpp \
+  /Users/italofilho/Documents/dev/P3D/PoolGame3D/include/glm/detail/qualifier.hpp \
+  /Users/italofilho/Documents/dev/P3D/PoolGame3D/include/glm/detail/setup.hpp \
+  /Users/italofilho/Documents/dev/P3D/PoolGame3D/include/glm/detail/type_mat3x3.hpp \
+  /Users/italofilho/Documents/dev/P3D/PoolGame3D/include/glm/detail/type_mat4x4.hpp \
+  /Users/italofilho/Documents/dev/P3D/PoolGame3D/include/glm/detail/type_vec3.hpp \
+  /Users/italofilho/Documents/dev/P3D/PoolGame3D/include/glm/detail/type_vec4.hpp \
+  /Users/italofilho/Documents/dev/P3D/PoolGame3D/include/glm/exponential.hpp \
+  /Users/italofilho/Documents/dev/P3D/PoolGame3D/include/glm/common.hpp \
+  /Users/italofilho/Documents/dev/P3D/PoolGame3D/include/glm/detail/type_mat3x3.hpp \
+  /Users/italofilho/Documents/dev/P3D/PoolGame3D/include/glm/detail/type_mat4x4.hpp \
+  /Users/italofilho/Documents/dev/P3D/PoolGame3D/include/glm/detail/type_vec3.hpp \
+  /Users/italofilho/Documents/dev/P3D/PoolGame3D/include/glm/detail/type_vec4.hpp \
+  /Users/italofilho/Documents/dev/P3D/PoolGame3D/include/glm/exponential.hpp \
+  /Users/italofilho/Documents/dev/P3D/PoolGame3D/include/glm/vector_relational.hpp \
+  /Users/italofilho/Documents/dev/P3D/PoolGame3D/include/glm/ext/quaternion_common.hpp \
+  /Users/italofilho/Documents/dev/P3D/PoolGame3D/include/glm/ext/quaternion_geometric.hpp \
+  /Users/italofilho/Documents/dev/P3D/PoolGame3D/include/glm/ext/quaternion_relational.hpp \
+  /Users/italofilho/Documents/dev/P3D/PoolGame3D/include/glm/ext/quaternion_relational.inl \
+  /Users/italofilho/Documents/dev/P3D/PoolGame3D/include/glm/ext/vector_relational.hpp \
+  /Users/italofilho/Documents/dev/P3D/PoolGame3D/include/glm/gtc/constants.hpp \
+  /Users/italofilho/Documents/dev/P3D/PoolGame3D/include/glm/gtc/matrix_transform.hpp \
+  /Users/italofilho/Documents/dev/P3D/PoolGame3D/include/glm/trigonometric.hpp \
+  /Users/italofilho/Documents/dev/P3D/PoolGame3D/include/glm/detail/qualifier.hpp \
+  /Users/italofilho/Documents/dev/P3D/PoolGame3D/include/glm/detail/setup.hpp \
+  /Users/italofilho/Documents/dev/P3D/PoolGame3D/include/glm/detail/type_float.hpp \
+  /Users/italofilho/Documents/dev/P3D/PoolGame3D/include/glm/detail/type_quat.hpp \
+  /Users/italofilho/Documents/dev/P3D/PoolGame3D/include/glm/detail/type_quat.inl \
+  /Users/italofilho/Documents/dev/P3D/PoolGame3D/include/glm/detail/type_vec1.hpp \
+  /Users/italofilho/Documents/dev/P3D/PoolGame3D/include/glm/exponential.hpp \
+  /Users/italofilho/Documents/dev/P3D/PoolGame3D/include/glm/exponential.hpp \
+  /Users/italofilho/Documents/dev/P3D/PoolGame3D/include/glm/ext/vector_relational.hpp \
+  /Users/italofilho/Documents/dev/P3D/PoolGame3D/include/glm/geometric.hpp \
+  /Users/italofilho/Documents/dev/P3D/PoolGame3D/include/glm/ext/quaternion_geometric.hpp \
+  /Users/italofilho/Documents/dev/P3D/PoolGame3D/include/glm/ext/quaternion_geometric.inl \
+  /Users/italofilho/Documents/dev/P3D/PoolGame3D/include/glm/ext/scalar_constants.hpp \
+  /Users/italofilho/Documents/dev/P3D/PoolGame3D/include/glm/ext/scalar_int_sized.hpp \
+  /Users/italofilho/Documents/dev/P3D/PoolGame3D/include/glm/ext/scalar_uint_sized.hpp \
+  /Users/italofilho/Documents/dev/P3D/PoolGame3D/include/glm/ext/vector_int1.hpp \
+  /Users/italofilho/Documents/dev/P3D/PoolGame3D/include/glm/ext/vector_uint1.hpp \
+  /Users/italofilho/Documents/dev/P3D/PoolGame3D/include/glm/geometric.hpp \
+  /Users/italofilho/Documents/dev/P3D/PoolGame3D/include/glm/trigonometric.hpp \
+  /Users/italofilho/Documents/dev/P3D/PoolGame3D/include/glm/vector_relational.hpp \
+  /Users/italofilho/Documents/dev/P3D/PoolGame3D/include/glm/ext/quaternion_common.hpp \
+  /Users/italofilho/Documents/dev/P3D/PoolGame3D/include/glm/ext/quaternion_common.inl \
+  /Users/italofilho/Documents/dev/P3D/PoolGame3D/include/glm/ext/quaternion_double.hpp \
+  /Users/italofilho/Documents/dev/P3D/PoolGame3D/include/glm/ext/quaternion_double_precision.hpp \
+  /Users/italofilho/Documents/dev/P3D/PoolGame3D/include/glm/ext/quaternion_float.hpp \
+  /Users/italofilho/Documents/dev/P3D/PoolGame3D/include/glm/ext/quaternion_float_precision.hpp \
+  /Users/italofilho/Documents/dev/P3D/PoolGame3D/include/glm/ext/quaternion_geometric.hpp \
+  /Users/italofilho/Documents/dev/P3D/PoolGame3D/include/glm/ext/quaternion_relational.hpp \
+  /Users/italofilho/Documents/dev/P3D/PoolGame3D/include/glm/ext/quaternion_transform.hpp \
+  /Users/italofilho/Documents/dev/P3D/PoolGame3D/include/glm/ext/quaternion_transform.inl \
+  /Users/italofilho/Documents/dev/P3D/PoolGame3D/include/glm/ext/quaternion_trigonometric.hpp \
+  /Users/italofilho/Documents/dev/P3D/PoolGame3D/include/glm/ext/quaternion_trigonometric.inl \
+  /Users/italofilho/Documents/dev/P3D/PoolGame3D/include/glm/ext/scalar_constants.hpp \
+  /Users/italofilho/Documents/dev/P3D/PoolGame3D/include/glm/ext/vector_bool1.hpp \
+  /Users/italofilho/Documents/dev/P3D/PoolGame3D/include/glm/ext/vector_bool1_precision.hpp \
+  /Users/italofilho/Documents/dev/P3D/PoolGame3D/include/glm/ext/vector_double1.hpp \
+  /Users/italofilho/Documents/dev/P3D/PoolGame3D/include/glm/ext/vector_double1_precision.hpp \
+  /Users/italofilho/Documents/dev/P3D/PoolGame3D/include/glm/ext/vector_float1.hpp \
+  /Users/italofilho/Documents/dev/P3D/PoolGame3D/include/glm/ext/vector_float1_precision.hpp \
+  /Users/italofilho/Documents/dev/P3D/PoolGame3D/include/glm/ext/vector_int1.hpp \
+  /Users/italofilho/Documents/dev/P3D/PoolGame3D/include/glm/ext/vector_int1_sized.hpp \
+  /Users/italofilho/Documents/dev/P3D/PoolGame3D/include/glm/ext/vector_relational.hpp \
+  /Users/italofilho/Documents/dev/P3D/PoolGame3D/include/glm/ext/vector_relational.inl \
+  /Users/italofilho/Documents/dev/P3D/PoolGame3D/include/glm/ext/vector_uint1.hpp \
+  /Users/italofilho/Documents/dev/P3D/PoolGame3D/include/glm/ext/vector_uint1_sized.hpp \
+  /Users/italofilho/Documents/dev/P3D/PoolGame3D/include/glm/geometric.hpp \
+  /Users/italofilho/Documents/dev/P3D/PoolGame3D/include/glm/gtc/constants.hpp \
+  /Users/italofilho/Documents/dev/P3D/PoolGame3D/include/glm/gtc/matrix_transform.hpp \
+  /Users/italofilho/Documents/dev/P3D/PoolGame3D/include/glm/trigonometric.hpp \
+  /Users/italofilho/Documents/dev/P3D/PoolGame3D/include/glm/vector_relational.hpp \
+  /Users/italofilho/Documents/dev/P3D/PoolGame3D/include/glm/gtc/epsilon.hpp \
+  /Users/italofilho/Documents/dev/P3D/PoolGame3D/include/glm/gtc/epsilon.inl \
+  /Users/italofilho/Documents/dev/P3D/PoolGame3D/include/glm/gtc/quaternion.hpp \
+  /Users/italofilho/Documents/dev/P3D/PoolGame3D/include/glm/gtc/quaternion.inl \
+  /Users/italofilho/Documents/dev/P3D/PoolGame3D/include/glm/gtc/vec1.hpp \
+  /Users/italofilho/Documents/dev/P3D/PoolGame3D/include/glm/mat2x2.hpp \
+  /Users/italofilho/Documents/dev/P3D/PoolGame3D/include/glm/mat2x3.hpp \
+  /Users/italofilho/Documents/dev/P3D/PoolGame3D/include/glm/mat2x4.hpp \
+  /Users/italofilho/Documents/dev/P3D/PoolGame3D/include/glm/mat3x2.hpp \
+  /Users/italofilho/Documents/dev/P3D/PoolGame3D/include/glm/mat3x3.hpp \
+  /Users/italofilho/Documents/dev/P3D/PoolGame3D/include/glm/mat3x4.hpp \
+  /Users/italofilho/Documents/dev/P3D/PoolGame3D/include/glm/mat4x2.hpp \
+  /Users/italofilho/Documents/dev/P3D/PoolGame3D/include/glm/mat4x3.hpp \
   /Users/italofilho/Documents/dev/P3D/PoolGame3D/include/glm/mat4x4.hpp \
   /Users/italofilho/Documents/dev/P3D/PoolGame3D/include/glm/matrix.hpp \
   /Users/italofilho/Documents/dev/P3D/PoolGame3D/include/glm/trigonometric.hpp \
@@ -7203,6 +7289,8 @@ CMakeFiles/PoolGame3D.dir/src/common/ObjModelLoader.cpp.o: /Users/italofilho/Doc
   /Users/italofilho/Documents/dev/P3D/PoolGame3D/include/glm/vec4.hpp \
   /Users/italofilho/Documents/dev/P3D/PoolGame3D/include/glm/gtc/matrix_transform.hpp \
   /Users/italofilho/Documents/dev/P3D/PoolGame3D/include/glm/gtc/matrix_transform.inl \
+  /Users/italofilho/Documents/dev/P3D/PoolGame3D/include/glm/gtc/type_ptr.hpp \
+  /Users/italofilho/Documents/dev/P3D/PoolGame3D/include/glm/gtc/type_ptr.inl \
   /Users/italofilho/Documents/dev/P3D/PoolGame3D/include/glm/integer.hpp \
   /Users/italofilho/Documents/dev/P3D/PoolGame3D/include/glm/mat2x2.hpp \
   /Users/italofilho/Documents/dev/P3D/PoolGame3D/include/glm/mat2x3.hpp \
@@ -9049,6 +9137,7 @@ CMakeFiles/PoolGame3D.dir/src/common/Renderer.cpp.o: /Users/italofilho/Documents
   /Users/italofilho/Documents/dev/P3D/PoolGame3D/src/header/Camera.h \
   /Users/italofilho/Documents/dev/P3D/PoolGame3D/src/header/Light.h \
   /Users/italofilho/Documents/dev/P3D/PoolGame3D/src/header/Mesh.h \
+  /Users/italofilho/Documents/dev/P3D/PoolGame3D/src/header/ObjModelLoader.h \
   /Users/italofilho/Documents/dev/P3D/PoolGame3D/src/header/Renderer.h \
   /Users/italofilho/Documents/dev/P3D/PoolGame3D/src/header/Shader.h \
   /Users/italofilho/Documents/dev/P3D/PoolGame3D/src/header/ShadersSources.h \

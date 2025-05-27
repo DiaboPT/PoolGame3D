@@ -19,6 +19,7 @@ public:
     void setUniform(const std::string& name, float value) const;
     void setUniform(const std::string& name, int value) const;
     void setMat4(const std::string& name, const glm::mat4& mat) const;
+    GLuint getProgramId() const;
 
 private:
     GLuint programId;

@@ -1012,6 +1012,7 @@ CMakeFiles/PoolGame3D.dir/src/common/Renderer.cpp.o: \
   /Users/italofilho/Documents/dev/P3D/PoolGame3D/src/header/Window.h \
   /opt/homebrew/include/GLFW/glfw3.h \
   /Users/italofilho/Documents/dev/P3D/PoolGame3D/src/header/Light.h \
+  /Users/italofilho/Documents/dev/P3D/PoolGame3D/src/header/ObjModelLoader.h \
   /Library/Developer/CommandLineTools/SDKs/MacOSX15.4.sdk/usr/include/c++/v1/iostream \
   /Library/Developer/CommandLineTools/SDKs/MacOSX15.4.sdk/usr/include/c++/v1/istream \
   /Library/Developer/CommandLineTools/SDKs/MacOSX15.4.sdk/usr/include/c++/v1/__ostream/basic_ostream.h \

@@ -248,19 +248,6 @@ bool Mesh::createSphere(int sectorCount, int stackCount) {
     return true;
 }
 
-bool Mesh::createMultipleSpheres(const std::vector<glm::vec3>& positions) {
-    // Cria apenas uma esfera (malha)
-    if (!createSphere()) {
-        return false;
-    }
-    
-    // Armazena as posições para renderização
-    spherePositions = positions;
-    isMultipleSpheres = true;
-    
-    return true;
-}
-
 void Mesh::render() const {
     glBindVertexArray(VAO);
     if (isMultipleSpheres && !spherePositions.empty()) {

@@ -80,3 +80,7 @@ bool Shader::linkProgram() {
     }
     return true;
 }
+
+GLuint Shader::getProgramId() const {
+    return programId;
+}

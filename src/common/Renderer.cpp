@@ -49,15 +49,62 @@ void Renderer::renderMeshes(const Camera& camera, Mesh& tableMesh, Mesh& ballsMe
     ballsMesh.render();
 }
 
-void Renderer::renderScene(const Camera& camera, Mesh& tableMesh, Mesh& ballsMesh, const Window& window, const Light& light) {
+void Renderer::renderScene(const Camera& camera, Mesh& tableMesh, std::vector<std::shared_ptr<ObjModelLoader>>& poolBalls, std::vector<glm::vec3>& ballPositions, const Window& window, const Light& light) {
     int fbWidth, fbHeight;
     glfwGetFramebufferSize(window.getHandle(), &fbWidth, &fbHeight);
     glViewport(0, 0, fbWidth, fbHeight);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    renderMeshes(camera, tableMesh, ballsMesh, window, light);
+
+    // Renderizar mesa
+    mainShader.use();
+    glm::mat4 view = camera.getViewMatrix();
+    float aspect = fbWidth / (float)fbHeight;
+    glm::mat4 proj = camera.getProjectionMatrix(aspect);
+    glm::mat4 modelTable = glm::mat4(1.0f);
+    modelTable = glm::scale(modelTable, glm::vec3(1.5f, 0.3f, 3.0f));
+    mainShader.setMat4("model", modelTable);
+    mainShader.setMat4("view", view);
+    mainShader.setMat4("projection", proj);
+    mainShader.setUniform("lightPos", light.getPosition());
+    mainShader.setUniform("lightColor", light.getColor());
+    mainShader.setUniform("viewPos", glm::vec3(view[3]));
+    tableMesh.render();
+
+    // Renderizar todas as bolas
+    glDisable(GL_CULL_FACE);
+    glEnable(GL_DEPTH_TEST);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    // Renderizar bola branca
+    if (poolBalls.size() > 0) {
+        ballShader.use();
+        ballShader.setMat4("view", view);
+        ballShader.setMat4("projection", proj);
+        ballShader.setUniform("lightPos", light.getPosition());
+        ballShader.setUniform("lightColor", light.getColor());
+        ballShader.setUniform("viewPos", glm::vec3(view[3]));
+        glUniform1i(glGetUniformLocation(ballShader.getProgramId(), "useTexture"), 0);
+        glm::mat4 modelWhite = glm::mat4(1.0f);
+        modelWhite = glm::translate(modelWhite, ballPositions[0]);
+        modelWhite = glm::scale(modelWhite, glm::vec3(0.07f));
+        poolBalls[0]->Render(ballPositions[0], glm::vec3(0,0,0), ballShader.getProgramId(), modelWhite, view, proj);
+    }
+    // Renderizar bolas coloridas
+    for (size_t i = 1; i < poolBalls.size(); ++i) {
+        ballShader.use();
+        ballShader.setMat4("view", view);
+        ballShader.setMat4("projection", proj);
+        ballShader.setUniform("lightPos", light.getPosition());
+        ballShader.setUniform("lightColor", light.getColor());
+        ballShader.setUniform("viewPos", glm::vec3(view[3]));
+        glUniform1i(glGetUniformLocation(ballShader.getProgramId(), "useTexture"), 1);
+        glm::mat4 modelBall = glm::mat4(1.0f);
+        modelBall = glm::translate(modelBall, ballPositions[i]);
+        modelBall = glm::scale(modelBall, glm::vec3(0.07f));
+        poolBalls[i]->Render(ballPositions[i], glm::vec3(0,0,0), ballShader.getProgramId(), modelBall, view, proj);
+    }
 }
 
-void Renderer::renderMinimap(const Camera& camera, Mesh& tableMesh, Mesh& ballsMesh, const Window& window, const Light& light) {
+void Renderer::renderMinimap(const Camera& camera, Mesh& tableMesh, std::vector<std::shared_ptr<ObjModelLoader>>& poolBalls, std::vector<glm::vec3>& ballPositions, const Window& window, const Light& light) {
     setupMinimapViewport(window);
     int windowWidth, windowHeight;
     glfwGetFramebufferSize(window.getHandle(), &windowWidth, &windowHeight);
@@ -69,21 +116,16 @@ void Renderer::renderMinimap(const Camera& camera, Mesh& tableMesh, Mesh& ballsM
     glScissor(minimapX, minimapY, minimapWidth, minimapHeight);
     glClear(GL_DEPTH_BUFFER_BIT);
 
-    // Aspect ratio do minimapa
     float minimapAspect = minimapWidth / minimapHeight;
-    float tableHalfWidth = 1.5f;  // metade do comprimento da mesa (x)
-    float tableHalfHeight = 0.75f; // metade da largura da mesa (z)
+    float tableHalfWidth = 1.5f;
+    float tableHalfHeight = 0.75f;
     float orthoX = tableHalfWidth;
     float orthoY = tableHalfHeight;
     if (minimapAspect > (tableHalfWidth / tableHalfHeight)) {
-        // Viewport mais larga que a mesa: aumenta X
         orthoX = minimapAspect * tableHalfHeight;
     } else {
-        // Viewport mais alta que a mesa: aumenta Y
         orthoY = tableHalfWidth / minimapAspect;
     }
-
-    // Matrizes de câmera top view (up corrigido)
     glm::mat4 view = glm::lookAt(glm::vec3(0, 5, 0), glm::vec3(0, 0, 0), glm::vec3(0, 0, 1));
     glm::mat4 proj = glm::ortho(-orthoX, orthoX, -orthoY, orthoY, 0.1f, 100.0f);
 
@@ -99,15 +141,38 @@ void Renderer::renderMinimap(const Camera& camera, Mesh& tableMesh, Mesh& ballsM
     mainShader.setUniform("viewPos", glm::vec3(view[3]));
     tableMesh.render();
 
-    // Renderizar bolas
-    ballShader.use();
-    ballShader.setMat4("view", view);
-    ballShader.setMat4("projection", proj);
-    ballShader.setUniform("lightPos", light.getPosition());
-    ballShader.setUniform("lightColor", light.getColor());
-    ballShader.setUniform("viewPos", glm::vec3(view[3]));
-    ballsMesh.render();
-
+    // Renderizar todas as bolas
+    glDisable(GL_CULL_FACE);
+    glEnable(GL_DEPTH_TEST);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    // Renderizar bola branca
+    if (poolBalls.size() > 0) {
+        ballShader.use();
+        ballShader.setMat4("view", view);
+        ballShader.setMat4("projection", proj);
+        ballShader.setUniform("lightPos", light.getPosition());
+        ballShader.setUniform("lightColor", light.getColor());
+        ballShader.setUniform("viewPos", glm::vec3(view[3]));
+        glUniform1i(glGetUniformLocation(ballShader.getProgramId(), "useTexture"), 0);
+        glm::mat4 modelWhite = glm::mat4(1.0f);
+        modelWhite = glm::translate(modelWhite, ballPositions[0]);
+        modelWhite = glm::scale(modelWhite, glm::vec3(0.07f));
+        poolBalls[0]->Render(ballPositions[0], glm::vec3(0,0,0), ballShader.getProgramId(), modelWhite, view, proj);
+    }
+    // Renderizar bolas coloridas
+    for (size_t i = 1; i < poolBalls.size(); ++i) {
+        ballShader.use();
+        ballShader.setMat4("view", view);
+        ballShader.setMat4("projection", proj);
+        ballShader.setUniform("lightPos", light.getPosition());
+        ballShader.setUniform("lightColor", light.getColor());
+        ballShader.setUniform("viewPos", glm::vec3(view[3]));
+        glUniform1i(glGetUniformLocation(ballShader.getProgramId(), "useTexture"), 1);
+        glm::mat4 modelBall = glm::mat4(1.0f);
+        modelBall = glm::translate(modelBall, ballPositions[i]);
+        modelBall = glm::scale(modelBall, glm::vec3(0.07f));
+        poolBalls[i]->Render(ballPositions[i], glm::vec3(0,0,0), ballShader.getProgramId(), modelBall, view, proj);
+    }
     glDisable(GL_SCISSOR_TEST);
 }
 

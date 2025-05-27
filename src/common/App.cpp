@@ -10,6 +10,7 @@
 #include "ShadersSources.h"
 #include <chrono>
 #include <thread>
+#include "ObjModelLoader.h"
 
 using namespace PoolGame3D;
 
@@ -24,9 +25,9 @@ bool App::initializeAllMeshes() {
     }
 
     // Criar posições das bolas (triângulo de sinuca alinhado ao eixo Z)
-    float y = 0.20f;
-    float ballDist = 0.14f;
-    std::vector<glm::vec3> ballPositions;
+    float y = 0.25f;
+    float ballDist = 0.145f;
+    ballPositions.clear();
     // Bola branca
     ballPositions.push_back(glm::vec3(0.0f, y, -1.05f));
     // Triângulo de 15 bolas
@@ -41,10 +42,24 @@ bool App::initializeAllMeshes() {
             ballPositions.push_back(glm::vec3(x, y, z));
         }
     }
-
-    if (!ballsMesh.createMultipleSpheres(ballPositions)) {
-        std::cerr << "Erro ao criar meshes das bolas!" << std::endl;
-        return false;
+    // Carregar bola branca
+    poolBalls.clear();
+    auto whiteBall = std::make_shared<ObjModelLoader>();
+    if (whiteBall->Load("/Users/italofilho/Documents/dev/P3D/PoolGame3D/src/resource/Sphere.obj", true)) {
+        whiteBall->Install();
+        poolBalls.push_back(whiteBall);
+    }
+    // Carregar bolas coloridas (1 a 15)
+    for (int i = 1; i <= 15; ++i) {
+        auto ball = std::make_shared<ObjModelLoader>();
+        if (!ball->Load("/Users/italofilho/Documents/dev/P3D/PoolGame3D/src/resource/Sphere.obj", true)) {
+            continue;
+        }
+        std::string mtlPath = "/Users/italofilho/Documents/dev/P3D/PoolGame3D/src/resource/PoolBalls/Ball" + std::to_string(i) + ".mtl";
+        std::string texPath = "/Users/italofilho/Documents/dev/P3D/PoolGame3D/src/resource/PoolBalls/PoolBalluv" + std::to_string(i) + ".jpg";
+        ball->setMaterialAndTexture(mtlPath, texPath);
+        ball->Install();
+        poolBalls.push_back(ball);
     }
 
     return true;
@@ -107,8 +122,8 @@ void App::update(float deltaTime) {
 
 void App::render() {
     // Renderiza a cena principal
-    renderer.renderScene(camera, tableMesh, ballsMesh, window, sceneLight);
+    renderer.renderScene(camera, tableMesh, poolBalls, ballPositions, window, sceneLight);
     
     // Renderiza o minimapa
-    renderer.renderMinimap(camera, tableMesh, ballsMesh, window, sceneLight);
+    renderer.renderMinimap(camera, tableMesh, poolBalls, ballPositions, window, sceneLight);
 } 

@@ -1013,8 +1013,8 @@ CMakeFiles/PoolGame3D.dir/src/common/App.cpp.o: \
   /Users/italofilho/Documents/dev/P3D/PoolGame3D/src/header/ShadersSources.h \
   /Users/italofilho/Documents/dev/P3D/PoolGame3D/src/header/Window.h \
   /Users/italofilho/Documents/dev/P3D/PoolGame3D/src/header/Light.h \
-  /Users/italofilho/Documents/dev/P3D/PoolGame3D/src/header/InputManager.h \
   /Users/italofilho/Documents/dev/P3D/PoolGame3D/src/header/ObjModelLoader.h \
+  /Users/italofilho/Documents/dev/P3D/PoolGame3D/src/header/InputManager.h \
   /Users/italofilho/Documents/dev/P3D/PoolGame3D/src/header/OpenGLLoader.h \
   /Library/Developer/CommandLineTools/SDKs/MacOSX15.4.sdk/usr/include/c++/v1/iostream \
   /Library/Developer/CommandLineTools/SDKs/MacOSX15.4.sdk/usr/include/c++/v1/istream \

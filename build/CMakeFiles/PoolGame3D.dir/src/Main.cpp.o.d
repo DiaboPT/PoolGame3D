@@ -1013,5 +1013,5 @@ CMakeFiles/PoolGame3D.dir/src/Main.cpp.o: \
   /Users/italofilho/Documents/dev/P3D/PoolGame3D/src/header/ShadersSources.h \
   /Users/italofilho/Documents/dev/P3D/PoolGame3D/src/header/Window.h \
   /Users/italofilho/Documents/dev/P3D/PoolGame3D/src/header/Light.h \
-  /Users/italofilho/Documents/dev/P3D/PoolGame3D/src/header/InputManager.h \
-  /Users/italofilho/Documents/dev/P3D/PoolGame3D/src/header/ObjModelLoader.h
+  /Users/italofilho/Documents/dev/P3D/PoolGame3D/src/header/ObjModelLoader.h \
+  /Users/italofilho/Documents/dev/P3D/PoolGame3D/src/header/InputManager.h

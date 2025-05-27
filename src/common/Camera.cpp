@@ -5,8 +5,8 @@ using namespace PoolGame3D;
 Camera::Camera() {
     distance = 6.0f;
     yaw = 0.0f;
-    pitch = 0.0f;
-    position = glm::vec3(0.0f, 0.0f, 0.0f);
+    pitch = -30.0f;
+    position = glm::vec3(0.0f, 2.0f, 5.0f);
     target = glm::vec3(0.0f);
     fov = 45.0f;
 }
@@ -22,11 +22,11 @@ void Camera::update() {
 }
 
 glm::mat4 Camera::getViewMatrix() const {
-    return glm::lookAt(position, glm::vec3(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+    return glm::lookAt(position, target, glm::vec3(0.0f, 1.0f, 0.0f));
 }
 
 glm::mat4 Camera::getProjectionMatrix(float aspect) const {
-    return glm::perspective(glm::radians(fov), aspect, 0.1f, 100.0f);
+    return glm::perspective(glm::radians(fov), aspect, 0.5f, 100.0f);
 }
 
 void Camera::rotate(float yawDelta, float pitchDelta) {
