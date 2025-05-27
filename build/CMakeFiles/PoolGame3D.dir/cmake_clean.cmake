@@ -7,6 +7,8 @@ file(REMOVE_RECURSE
   "CMakeFiles/PoolGame3D.dir/src/common/Camera.cpp.o.d"
   "CMakeFiles/PoolGame3D.dir/src/common/InputManager.cpp.o"
   "CMakeFiles/PoolGame3D.dir/src/common/InputManager.cpp.o.d"
+  "CMakeFiles/PoolGame3D.dir/src/common/Light.cpp.o"
+  "CMakeFiles/PoolGame3D.dir/src/common/Light.cpp.o.d"
   "CMakeFiles/PoolGame3D.dir/src/common/Mesh.cpp.o"
   "CMakeFiles/PoolGame3D.dir/src/common/Mesh.cpp.o.d"
   "CMakeFiles/PoolGame3D.dir/src/common/ObjModelLoader.cpp.o"

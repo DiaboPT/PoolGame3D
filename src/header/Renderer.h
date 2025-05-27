@@ -5,6 +5,7 @@
 #include "Mesh.h"
 #include "Shader.h"
 #include "Window.h"
+#include "Light.h"
 
 namespace PoolGame3D {
 
@@ -14,15 +15,16 @@ public:
     ~Renderer();
 
     bool initialize();
-    void render(const Camera& camera, const Mesh& tableMesh, const Mesh& ballMesh, const Window& window);
-    void renderMinimap(const Camera& camera, const Mesh& tableMesh, const Mesh& ballMesh, const Window& window);
+    void renderScene(const Camera& camera, Mesh& tableMesh, Mesh& ballsMesh, const Window& window, const Light& light);
+    void renderMinimap(const Camera& camera, Mesh& tableMesh, Mesh& ballsMesh, const Window& window, const Light& light);
 
 private:
     PoolGame3D::Shader mainShader;
-    PoolGame3D::Shader minimapShader;
+    PoolGame3D::Shader ballShader;
     
     void setupMainViewport();
     void setupMinimapViewport(const Window& window);
+    void renderMeshes(const Camera& camera, Mesh& tableMesh, Mesh& ballsMesh, const Window& window, const Light& light);
 };
 
 } // namespace PoolGame3D

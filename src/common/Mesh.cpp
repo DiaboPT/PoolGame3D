@@ -1,5 +1,6 @@
 #include "Mesh.h"
 #include <iostream>
+#include <glm/gtc/matrix_transform.hpp>
 
 using namespace PoolGame3D;
 
@@ -112,14 +113,14 @@ bool Mesh::createParallelepiped() {
 }
 
 bool Mesh::createSphere(int sectorCount, int stackCount) {
-     std::cout << "Iniciando criação da esfera..." << std::endl;
+    std::cout << "Iniciando criação da esfera..." << std::endl;
     
     std::vector<GLfloat> vertices;
     std::vector<GLuint> indices;
 
-    float x, y, z, xy;                          // position
-    float nx, ny, nz, lengthInv = 1.0f;         // normal (optional)
-    float s, t;                                 // texture coord (optional)
+    float x, y, z, xy;                          // posição
+    float nx, ny, nz;                           // normal
+    float s, t;                                 // coordenada de textura
     float radius = 0.5f;
 
     const float PI = 3.14159265359f;
@@ -127,28 +128,37 @@ bool Mesh::createSphere(int sectorCount, int stackCount) {
     float stackStep = PI / stackCount;
 
     for (int i = 0; i <= stackCount; ++i) {
-        float stackAngle = PI / 2 - i * stackStep;        // from pi/2 to -pi/2
+        float stackAngle = PI / 2 - i * stackStep;        // de pi/2 a -pi/2
         xy = radius * cosf(stackAngle);
         z = radius * sinf(stackAngle);
 
         for (int j = 0; j <= sectorCount; ++j) {
             float sectorAngle = j * sectorStep;
 
-            // vertex position (x, y, z)
+            // posição
             x = xy * cosf(sectorAngle);
             y = xy * sinf(sectorAngle);
             vertices.push_back(x);
             vertices.push_back(y);
             vertices.push_back(z);
 
-            // color (use normalized position as color)
-            vertices.push_back((x + 0.5f));  // R
-            vertices.push_back((y + 0.5f));  // G
-            vertices.push_back((z + 0.5f));  // B
+            // normal (igual à posição normalizada)
+            nx = x / radius;
+            ny = y / radius;
+            nz = z / radius;
+            vertices.push_back(nx);
+            vertices.push_back(ny);
+            vertices.push_back(nz);
+
+            // coordenada de textura (u, v)
+            s = (float)j / sectorCount;
+            t = (float)i / stackCount;
+            vertices.push_back(s);
+            vertices.push_back(t);
         }
     }
 
-    // Indices
+    // Índices
     for (int i = 0; i < stackCount; ++i) {
         int k1 = i * (sectorCount + 1);
         int k2 = k1 + sectorCount + 1;
@@ -216,29 +226,65 @@ bool Mesh::createSphere(int sectorCount, int stackCount) {
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(GLuint), indices.data(), GL_STATIC_DRAW);
 
     std::cout << "Configurando atributos da esfera..." << std::endl;
-    // Position
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (void*)0);
+    // posição
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (void*)0);
     glEnableVertexAttribArray(0);
-
-    // Color
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (void*)(3 * sizeof(GLfloat)));
+    // normal
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (void*)(3 * sizeof(GLfloat)));
     glEnableVertexAttribArray(1);
+    // texcoord
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (void*)(6 * sizeof(GLfloat)));
+    glEnableVertexAttribArray(2);
 
     std::cout << "Limpando bindings da esfera..." << std::endl;
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
     
+    // Copiar para os membros da classe
+    this->vertices = vertices;
+    this->indices = indices;
+    
     std::cout << "Esfera criada com sucesso!" << std::endl;
+    return true;
+}
+
+bool Mesh::createMultipleSpheres(const std::vector<glm::vec3>& positions) {
+    // Cria apenas uma esfera (malha)
+    if (!createSphere()) {
+        return false;
+    }
+    
+    // Armazena as posições para renderização
+    spherePositions = positions;
+    isMultipleSpheres = true;
+    
     return true;
 }
 
 void Mesh::render() const {
     glBindVertexArray(VAO);
-    if (EBO != 0) {
-        glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
+    if (isMultipleSpheres && !spherePositions.empty()) {
+        // Renderiza uma esfera em cada posição
+        for (const auto& pos : spherePositions) {
+            glm::mat4 model = glm::translate(glm::mat4(1.0f), pos);
+            model = glm::scale(model, glm::vec3(0.11f)); 
+            // O shader deve estar ativo e receber o uniform "model" antes de chamar render()
+            GLint currentProgram;
+            glGetIntegerv(GL_CURRENT_PROGRAM, &currentProgram);
+            GLint modelLoc = glGetUniformLocation(currentProgram, "model");
+            glUniformMatrix4fv(modelLoc, 1, GL_FALSE, &model[0][0]);
+            if (EBO != 0) {
+                glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
+            } else {
+                glDrawArrays(GL_TRIANGLES, 0, 36);
+            }
+        }
     } else {
-        // Para o paralelepípedo, temos 36 vértices (6 faces * 2 triângulos * 3 vértices)
-        glDrawArrays(GL_TRIANGLES, 0, 36);
+        if (EBO != 0) {
+            glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
+        } else {
+            glDrawArrays(GL_TRIANGLES, 0, 36);
+        }
     }
     glBindVertexArray(0);
 }

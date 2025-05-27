@@ -1,4 +1,5 @@
 #include "App.h"
+#include "OpenGLLoader.h"
 #include <iostream>
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
@@ -12,75 +13,62 @@
 
 using namespace PoolGame3D;
 
-App::App() : isRunning(false), lastFrameTime(0.0f) {}
+App::App() : isRunning(false), lastFrameTime(0.0f), sceneLight(glm::vec3(2.0f, 4.0f, 2.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1.0f) {}
 App::~App() {}
+
+bool App::initializeAllMeshes() {
+    // Inicializar mesh da mesa
+    if (!tableMesh.createParallelepiped()) {
+        std::cerr << "Erro ao criar mesh da mesa!" << std::endl;
+        return false;
+    }
+
+    // Criar posições das bolas (triângulo de sinuca alinhado ao eixo Z)
+    float y = 0.20f;
+    float ballDist = 0.14f;
+    std::vector<glm::vec3> ballPositions;
+    // Bola branca
+    ballPositions.push_back(glm::vec3(0.0f, y, -1.05f));
+    // Triângulo de 15 bolas
+    int numRows = 5;
+    float startZ = 0.55f;
+    for (int row = 0; row < numRows; ++row) {
+        int ballsInRow = row + 1;
+        float z = startZ + row * ballDist;
+        float xStart = -ballDist * row / 2.0f;
+        for (int i = 0; i < ballsInRow; ++i) {
+            float x = xStart + i * ballDist;
+            ballPositions.push_back(glm::vec3(x, y, z));
+        }
+    }
+
+    if (!ballsMesh.createMultipleSpheres(ballPositions)) {
+        std::cerr << "Erro ao criar meshes das bolas!" << std::endl;
+        return false;
+    }
+
+    return true;
+}
 
 bool App::initialize() {
     std::cout << "Iniciando aplicação..." << std::endl;
-    if (!glfwInit()) {
-        std::cerr << "Falha ao inicializar GLFW!" << std::endl;
-        return false;
-    }
-    std::cout << "GLFW inicializado com sucesso!" << std::endl;
-
-    // Configurar hints do GLFW
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-    glfwWindowHint(GLFW_COCOA_CHDIR_RESOURCES, GLFW_TRUE);
-    glfwWindowHint(GLFW_COCOA_RETINA_FRAMEBUFFER, GLFW_TRUE);
-
     if (!window.initialize(1200, 1000, "Pool Game 3D")) {
         std::cerr << "Falha ao criar janela GLFW!" << std::endl;
-        glfwTerminate();
         return false;
     }
     std::cout << "Janela criada com sucesso!" << std::endl;
 
-    glfwMakeContextCurrent(window.getHandle());
-    std::cout << "Contexto OpenGL criado!" << std::endl;
-
-    glewExperimental = GL_TRUE;
-    GLenum err = glewInit();
-    if (err != GLEW_OK) {
-        std::cerr << "Falha ao inicializar GLEW: " << glewGetErrorString(err) << std::endl;
-        glfwDestroyWindow(window.getHandle());
-        glfwTerminate();
+    if (!InitializeOpenGL(window)) {
+        window.terminate();
         return false;
     }
-    std::cout << "GLEW inicializado com sucesso!" << std::endl;
-    std::cout << "Versão do OpenGL: " << glGetString(GL_VERSION) << std::endl;
-    std::cout << "Vendor do OpenGL: " << glGetString(GL_VENDOR) << std::endl;
-    std::cout << "Renderer do OpenGL: " << glGetString(GL_RENDERER) << std::endl;
-
-    // Verificar funções OpenGL
-    if (!glfwGetProcAddress("glGenVertexArrays") ||
-        !glfwGetProcAddress("glBindVertexArray") ||
-        !glfwGetProcAddress("glGenBuffers")) {
-        std::cerr << "Funções OpenGL não disponíveis!" << std::endl;
-        return false;
-    }
-
-    if (!LoadOpenGLLibrary()) {
-        std::cerr << "Failed to load OpenGL library!" << std::endl;
-        glfwDestroyWindow(window.getHandle());
-        glfwTerminate();
-        return false;
-    }
-    std::cout << "OpenGL OK." << std::endl;
 
     // Inicializar input manager
     inputManager.initialize(window.getHandle());
     inputManager.setCamera(&camera);
 
-    // Inicializar meshes
-    if (!tableMesh.createParallelepiped()) {
-        std::cerr << "Erro ao criar mesh da mesa!" << std::endl;
-        return false;
-    }
-    if (!ballMesh.createSphere()) {
-        std::cerr << "Erro ao criar mesh da bola!" << std::endl;
+    // Inicializar todas as meshes (mesa e bolas)
+    if (!initializeAllMeshes()) {
         return false;
     }
 
@@ -89,17 +77,8 @@ bool App::initialize() {
         std::cerr << "Erro ao inicializar renderer!" << std::endl;
         return false;
     }
-
-    // OpenGL settings
-    glEnable(GL_DEPTH_TEST);
-    glEnable(GL_CULL_FACE);
-    glCullFace(GL_BACK);
-    glFrontFace(GL_CCW);
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-    glViewport(0, 0, window.getWidth(), window.getHeight());
-    glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+    
+    ConfigureOpenGL(window);
 
     isRunning = true;
     lastFrameTime = glfwGetTime();
@@ -128,8 +107,8 @@ void App::update(float deltaTime) {
 
 void App::render() {
     // Renderiza a cena principal
-    renderer.render(camera, tableMesh, ballMesh, window);
+    renderer.renderScene(camera, tableMesh, ballsMesh, window, sceneLight);
     
     // Renderiza o minimapa
-    renderer.renderMinimap(camera, tableMesh, ballMesh, window);
+    renderer.renderMinimap(camera, tableMesh, ballsMesh, window, sceneLight);
 } 

@@ -4,8 +4,8 @@
 
 namespace PoolGame3D {
 // Declarações externas
-extern const char* vertexShaderTexture;
-extern const char* fragmentShaderTexture;
-extern const char* vertexShaderSource;
-extern const char* fragmentShaderSource;
+extern const char* vertexShaderTable;
+extern const char* fragmentShaderTable;
+extern const char* vertexShaderBall;
+extern const char* fragmentShaderBall;
 } 

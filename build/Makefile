@@ -225,6 +225,30 @@ src/common/InputManager.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/PoolGame3D.dir/build.make CMakeFiles/PoolGame3D.dir/src/common/InputManager.cpp.s
 .PHONY : src/common/InputManager.cpp.s
 
+src/common/Light.o: src/common/Light.cpp.o
+.PHONY : src/common/Light.o
+
+# target to build an object file
+src/common/Light.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/PoolGame3D.dir/build.make CMakeFiles/PoolGame3D.dir/src/common/Light.cpp.o
+.PHONY : src/common/Light.cpp.o
+
+src/common/Light.i: src/common/Light.cpp.i
+.PHONY : src/common/Light.i
+
+# target to preprocess a source file
+src/common/Light.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/PoolGame3D.dir/build.make CMakeFiles/PoolGame3D.dir/src/common/Light.cpp.i
+.PHONY : src/common/Light.cpp.i
+
+src/common/Light.s: src/common/Light.cpp.s
+.PHONY : src/common/Light.s
+
+# target to generate assembly for a file
+src/common/Light.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/PoolGame3D.dir/build.make CMakeFiles/PoolGame3D.dir/src/common/Light.cpp.s
+.PHONY : src/common/Light.cpp.s
+
 src/common/Mesh.o: src/common/Mesh.cpp.o
 .PHONY : src/common/Mesh.o
 
@@ -414,6 +438,9 @@ help:
 	@echo "... src/common/InputManager.o"
 	@echo "... src/common/InputManager.i"
 	@echo "... src/common/InputManager.s"
+	@echo "... src/common/Light.o"
+	@echo "... src/common/Light.i"
+	@echo "... src/common/Light.s"
 	@echo "... src/common/Mesh.o"
 	@echo "... src/common/Mesh.i"
 	@echo "... src/common/Mesh.s"

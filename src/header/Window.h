@@ -11,6 +11,7 @@ public:
     ~Window();
 
     bool initialize(int width, int height, const std::string& title);
+    void terminate();
     bool shouldClose() const;
     void swapBuffers();
     void pollEvents();

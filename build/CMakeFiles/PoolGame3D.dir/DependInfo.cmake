@@ -12,6 +12,7 @@ set(CMAKE_DEPENDS_DEPENDENCY_FILES
   "/Users/italofilho/Documents/dev/P3D/PoolGame3D/src/common/App.cpp" "CMakeFiles/PoolGame3D.dir/src/common/App.cpp.o" "gcc" "CMakeFiles/PoolGame3D.dir/src/common/App.cpp.o.d"
   "/Users/italofilho/Documents/dev/P3D/PoolGame3D/src/common/Camera.cpp" "CMakeFiles/PoolGame3D.dir/src/common/Camera.cpp.o" "gcc" "CMakeFiles/PoolGame3D.dir/src/common/Camera.cpp.o.d"
   "/Users/italofilho/Documents/dev/P3D/PoolGame3D/src/common/InputManager.cpp" "CMakeFiles/PoolGame3D.dir/src/common/InputManager.cpp.o" "gcc" "CMakeFiles/PoolGame3D.dir/src/common/InputManager.cpp.o.d"
+  "/Users/italofilho/Documents/dev/P3D/PoolGame3D/src/common/Light.cpp" "CMakeFiles/PoolGame3D.dir/src/common/Light.cpp.o" "gcc" "CMakeFiles/PoolGame3D.dir/src/common/Light.cpp.o.d"
   "/Users/italofilho/Documents/dev/P3D/PoolGame3D/src/common/Mesh.cpp" "CMakeFiles/PoolGame3D.dir/src/common/Mesh.cpp.o" "gcc" "CMakeFiles/PoolGame3D.dir/src/common/Mesh.cpp.o.d"
   "/Users/italofilho/Documents/dev/P3D/PoolGame3D/src/common/ObjModelLoader.cpp" "CMakeFiles/PoolGame3D.dir/src/common/ObjModelLoader.cpp.o" "gcc" "CMakeFiles/PoolGame3D.dir/src/common/ObjModelLoader.cpp.o.d"
   "/Users/italofilho/Documents/dev/P3D/PoolGame3D/src/common/OpenGLLoader.cpp" "CMakeFiles/PoolGame3D.dir/src/common/OpenGLLoader.cpp.o" "gcc" "CMakeFiles/PoolGame3D.dir/src/common/OpenGLLoader.cpp.o.d"

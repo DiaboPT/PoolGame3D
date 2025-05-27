@@ -8,6 +8,7 @@
 #include "Camera.h"
 #include "Mesh.h"
 #include "ObjModelLoader.h"
+#include "Light.h"
 
 namespace PoolGame3D {
 
@@ -23,14 +24,17 @@ private:
     void update(float deltaTime);
     void render();
 
+    bool initializeAllMeshes();
+
     bool isRunning;
     float lastFrameTime;
     Window window;
     InputManager inputManager;
     Camera camera;
     Mesh tableMesh;
-    Mesh ballMesh;
+    Mesh ballsMesh;
     Renderer renderer;
+    Light sceneLight;
 };
 
 } // namespace PoolGame3D

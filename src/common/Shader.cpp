@@ -12,6 +12,11 @@ Shader::~Shader() {
     }
 }
 
+void Shader::setUniform(const std::string& name, const glm::vec3& value) const {
+    GLuint loc = glGetUniformLocation(programId, name.c_str());
+    glUniform3fv(loc, 1, &value[0]);
+}
+
 bool Shader::loadFromSource(const std::string& vertexSource, const std::string& fragmentSource) {
     GLuint vertexShader;
     GLuint fragmentShader;

@@ -34,6 +34,7 @@ set(SOURCES
     src/common/ObjModelLoader.cpp
     src/common/OpenGLLoader.cpp
     src/common/ShadersSources.cpp
+    src/common/Light.cpp
 )
 
 # Add executable
