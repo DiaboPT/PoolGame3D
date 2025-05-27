@@ -22,6 +22,12 @@ public:
     bool initialize();
     void run();
 
+    // Luzes públicas para acesso do InputManager
+    AmbientLight ambientLight;
+    DirectionalLight dirLight;
+    PointLight pointLight;
+    SpotLight spotLight;
+
 private:
     void update(float deltaTime);
     void render();

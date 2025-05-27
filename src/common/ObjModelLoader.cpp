@@ -22,25 +22,16 @@ namespace PoolGame3D {
         if (!LoadOBJ(obj_model_filepath, mtlFile)) return false;
 
         if (!ignoreMtl) {
-            // Descobrir o caminho base
-            size_t lastSlash = obj_model_filepath.find_last_of("/\\");
-            std::string basePath = (lastSlash == std::string::npos) ? "" : obj_model_filepath.substr(0, lastSlash + 1);
-            if (!LoadMTL(basePath + mtlFile, textureFile)) return false;
-            if (!LoadTexture(basePath + textureFile)) return false;
+        // Descobrir o caminho base
+        size_t lastSlash = obj_model_filepath.find_last_of("/\\");
+        std::string basePath = (lastSlash == std::string::npos) ? "" : obj_model_filepath.substr(0, lastSlash + 1);
+        if (!LoadMTL(basePath + mtlFile, textureFile)) return false;
+        if (!LoadTexture(basePath + textureFile)) return false;
         }
         return true;
     }
 
     void ObjModelLoader::Install() {
-        std::cout << "[INFO] Modelo instalado: " << (vertices.size() / 8) << " vértices, " << indices.size() << " índices." << std::endl;
-        // Para debug detalhado, descomente abaixo:
-        // for (size_t i = 0; i < std::min((size_t)10, vertices.size() / 8); ++i) {
-        //     std::cout << "Vértice " << i << ": ("
-        //               << vertices[i*8+0] << ", "
-        //               << vertices[i*8+1] << ", "
-        //               << vertices[i*8+2] << ")\n";
-        // }
-
         glGenVertexArrays(1, &VAO);
         glGenBuffers(1, &VBO);
         glGenBuffers(1, &EBO);
@@ -61,7 +52,6 @@ namespace PoolGame3D {
         glEnableVertexAttribArray(2);
 
         glBindVertexArray(0);
-        // std::cout << "Modelo instalado com sucesso!" << std::endl; // Removido para evitar repetição
     }
 
     void ObjModelLoader::Render(const glm::vec3& position, const glm::vec3& orientation, GLuint shaderProgram, const glm::mat4& modelIn, const glm::mat4& view, const glm::mat4& projection) {
@@ -139,7 +129,7 @@ namespace PoolGame3D {
                 }
                 // Se for triângulo
                 if (v.size() == 3) {
-                    for (int i = 0; i < 3; ++i) {
+                for (int i = 0; i < 3; ++i) {
                         vertexIndices.push_back(v[i]);
                         texcoordIndices.push_back(t[i]);
                         normalIndices.push_back(n[i]);
@@ -155,10 +145,10 @@ namespace PoolGame3D {
                     }
                     // Triângulo 2: 0,2,3
                     for (int i : {0,2,3}) {
-                        vertexIndices.push_back(v[i]);
-                        texcoordIndices.push_back(t[i]);
-                        normalIndices.push_back(n[i]);
-                    }
+                    vertexIndices.push_back(v[i]);
+                    texcoordIndices.push_back(t[i]);
+                    normalIndices.push_back(n[i]);
+                }
                 }
                 // Se for polígono maior, pode ser ignorado ou tratado (não esperado para esfera)
                 faceCount++;
@@ -209,16 +199,12 @@ namespace PoolGame3D {
 
     // Carrega textura usando stb_image
     bool ObjModelLoader::LoadTexture(const std::string& texturePath) {
-        // std::cout << "[DEBUG] Tentando carregar textura: " << texturePath << std::endl;
         int width, height, nrChannels;
         unsigned char* data = stbi_load(texturePath.c_str(), &width, &height, &nrChannels, 0);
         if (!data) {
             std::cerr << "[ERRO] Falha ao carregar textura: " << texturePath << std::endl;
             return false;
         }
-        std::cout << "[INFO] Textura carregada: " << texturePath << std::endl;
-        // Para debug detalhado, descomente abaixo:
-        // std::cout << "[DEBUG] Textura carregada com sucesso: " << texturePath << " (" << width << "x" << height << ", canais: " << nrChannels << ")" << std::endl;
         glGenTextures(1, &textureID);
         glBindTexture(GL_TEXTURE_2D, textureID);
 

@@ -41,4 +41,5 @@ void Camera::zoom(float amount) {
     fov -= amount;
     if (fov < 1.0f) fov = 1.0f;
     if (fov > 45.0f) fov = 45.0f;
-} 
+}
+

@@ -21,7 +21,9 @@ bool Renderer::initialize() {
     return true;
 }
 
-void Renderer::renderMeshes(const Camera& camera, Mesh& tableMesh, Mesh& ballsMesh, const Window& window, const Light& light) {
+void Renderer::renderMeshes(const Camera& camera, Mesh& tableMesh, Mesh& ballsMesh, const Window& window, const Light& light,
+                          const AmbientLight& ambientLight, const DirectionalLight& dirLight,
+                          const PointLight& pointLight, const SpotLight& spotLight) {
     // Shader da mesa com luz
     mainShader.use();
     glm::mat4 view = camera.getViewMatrix();
@@ -37,6 +39,27 @@ void Renderer::renderMeshes(const Camera& camera, Mesh& tableMesh, Mesh& ballsMe
     mainShader.setUniform("lightPos", light.getPosition());
     mainShader.setUniform("lightColor", light.getColor());
     mainShader.setUniform("viewPos", glm::vec3(view[3]));
+    mainShader.setUniform("ambientEnabled", ambientLight.enabled);
+    mainShader.setUniform("ambientColor", ambientLight.color);
+    mainShader.setUniform("ambientIntensity", ambientLight.intensity);
+    mainShader.setUniform("dirEnabled", dirLight.enabled);
+    mainShader.setUniform("dirDirection", dirLight.direction);
+    mainShader.setUniform("dirColor", dirLight.color);
+    mainShader.setUniform("dirIntensity", dirLight.intensity);
+    mainShader.setUniform("pointEnabled", pointLight.enabled);
+    mainShader.setUniform("pointPos", pointLight.position);
+    mainShader.setUniform("pointColor", pointLight.color);
+    mainShader.setUniform("pointIntensity", pointLight.intensity);
+    mainShader.setUniform("spotEnabled", spotLight.enabled);
+    mainShader.setUniform("spotPos", spotLight.position);
+    mainShader.setUniform("spotDir", spotLight.direction);
+    mainShader.setUniform("spotColor", spotLight.color);
+    mainShader.setUniform("spotIntensity", spotLight.intensity);
+    mainShader.setUniform("spotCutOff", spotLight.cutOff);
+    mainShader.setUniform("spotOuterCutOff", spotLight.outerCutOff);
+    mainShader.setUniform("spotConstant", spotLight.constant);
+    mainShader.setUniform("spotLinear", pointLight.linear);
+    mainShader.setUniform("spotQuadratic", pointLight.quadratic);
     tableMesh.render();
 
     // Shader das bolas com luz
@@ -46,10 +69,34 @@ void Renderer::renderMeshes(const Camera& camera, Mesh& tableMesh, Mesh& ballsMe
     ballShader.setUniform("lightPos", light.getPosition());
     ballShader.setUniform("lightColor", light.getColor());
     ballShader.setUniform("viewPos", glm::vec3(view[3]));
+    ballShader.setUniform("ambientEnabled", ambientLight.enabled);
+    ballShader.setUniform("ambientColor", ambientLight.color);
+    ballShader.setUniform("ambientIntensity", ambientLight.intensity);
+    ballShader.setUniform("dirEnabled", dirLight.enabled);
+    ballShader.setUniform("dirDirection", dirLight.direction);
+    ballShader.setUniform("dirColor", dirLight.color);
+    ballShader.setUniform("dirIntensity", dirLight.intensity);
+    ballShader.setUniform("pointEnabled", pointLight.enabled);
+    ballShader.setUniform("pointPos", pointLight.position);
+    ballShader.setUniform("pointColor", pointLight.color);
+    ballShader.setUniform("pointIntensity", pointLight.intensity);
+    ballShader.setUniform("spotEnabled", spotLight.enabled);
+    ballShader.setUniform("spotPos", spotLight.position);
+    ballShader.setUniform("spotDir", spotLight.direction);
+    ballShader.setUniform("spotColor", spotLight.color);
+    ballShader.setUniform("spotIntensity", spotLight.intensity);
+    ballShader.setUniform("spotCutOff", spotLight.cutOff);
+    ballShader.setUniform("spotOuterCutOff", spotLight.outerCutOff);
+    ballShader.setUniform("spotConstant", spotLight.constant);
+    ballShader.setUniform("spotLinear", pointLight.linear);
+    ballShader.setUniform("spotQuadratic", pointLight.quadratic);
     ballsMesh.render();
 }
 
-void Renderer::renderScene(const Camera& camera, Mesh& tableMesh, std::vector<std::shared_ptr<ObjModelLoader>>& poolBalls, std::vector<glm::vec3>& ballPositions, const Window& window, const Light& light) {
+void Renderer::renderScene(const Camera& camera, Mesh& tableMesh, std::vector<std::shared_ptr<ObjModelLoader>>& poolBalls, 
+                         std::vector<glm::vec3>& ballPositions, const Window& window, const Light& light,
+                         const AmbientLight& ambientLight, const DirectionalLight& dirLight,
+                         const PointLight& pointLight, const SpotLight& spotLight) {
     int fbWidth, fbHeight;
     glfwGetFramebufferSize(window.getHandle(), &fbWidth, &fbHeight);
     glViewport(0, 0, fbWidth, fbHeight);
@@ -68,6 +115,27 @@ void Renderer::renderScene(const Camera& camera, Mesh& tableMesh, std::vector<st
     mainShader.setUniform("lightPos", light.getPosition());
     mainShader.setUniform("lightColor", light.getColor());
     mainShader.setUniform("viewPos", glm::vec3(view[3]));
+    mainShader.setUniform("ambientEnabled", ambientLight.enabled);
+    mainShader.setUniform("ambientColor", ambientLight.color);
+    mainShader.setUniform("ambientIntensity", ambientLight.intensity);
+    mainShader.setUniform("dirEnabled", dirLight.enabled);
+    mainShader.setUniform("dirDirection", dirLight.direction);
+    mainShader.setUniform("dirColor", dirLight.color);
+    mainShader.setUniform("dirIntensity", dirLight.intensity);
+    mainShader.setUniform("pointEnabled", pointLight.enabled);
+    mainShader.setUniform("pointPos", pointLight.position);
+    mainShader.setUniform("pointColor", pointLight.color);
+    mainShader.setUniform("pointIntensity", pointLight.intensity);
+    mainShader.setUniform("spotEnabled", spotLight.enabled);
+    mainShader.setUniform("spotPos", spotLight.position);
+    mainShader.setUniform("spotDir", spotLight.direction);
+    mainShader.setUniform("spotColor", spotLight.color);
+    mainShader.setUniform("spotIntensity", spotLight.intensity);
+    mainShader.setUniform("spotCutOff", spotLight.cutOff);
+    mainShader.setUniform("spotOuterCutOff", spotLight.outerCutOff);
+    mainShader.setUniform("spotConstant", spotLight.constant);
+    mainShader.setUniform("spotLinear", pointLight.linear);
+    mainShader.setUniform("spotQuadratic", pointLight.quadratic);
     tableMesh.render();
 
     // Renderizar todas as bolas
@@ -82,6 +150,27 @@ void Renderer::renderScene(const Camera& camera, Mesh& tableMesh, std::vector<st
         ballShader.setUniform("lightPos", light.getPosition());
         ballShader.setUniform("lightColor", light.getColor());
         ballShader.setUniform("viewPos", glm::vec3(view[3]));
+        ballShader.setUniform("ambientEnabled", ambientLight.enabled);
+        ballShader.setUniform("ambientColor", ambientLight.color);
+        ballShader.setUniform("ambientIntensity", ambientLight.intensity);
+        ballShader.setUniform("dirEnabled", dirLight.enabled);
+        ballShader.setUniform("dirDirection", dirLight.direction);
+        ballShader.setUniform("dirColor", dirLight.color);
+        ballShader.setUniform("dirIntensity", dirLight.intensity);
+        ballShader.setUniform("pointEnabled", pointLight.enabled);
+        ballShader.setUniform("pointPos", pointLight.position);
+        ballShader.setUniform("pointColor", pointLight.color);
+        ballShader.setUniform("pointIntensity", pointLight.intensity);
+        ballShader.setUniform("spotEnabled", spotLight.enabled);
+        ballShader.setUniform("spotPos", spotLight.position);
+        ballShader.setUniform("spotDir", spotLight.direction);
+        ballShader.setUniform("spotColor", spotLight.color);
+        ballShader.setUniform("spotIntensity", spotLight.intensity);
+        ballShader.setUniform("spotCutOff", spotLight.cutOff);
+        ballShader.setUniform("spotOuterCutOff", spotLight.outerCutOff);
+        ballShader.setUniform("spotConstant", spotLight.constant);
+        ballShader.setUniform("spotLinear", pointLight.linear);
+        ballShader.setUniform("spotQuadratic", pointLight.quadratic);
         glUniform1i(glGetUniformLocation(ballShader.getProgramId(), "useTexture"), 0);
         glm::mat4 modelWhite = glm::mat4(1.0f);
         modelWhite = glm::translate(modelWhite, ballPositions[0]);
@@ -96,6 +185,27 @@ void Renderer::renderScene(const Camera& camera, Mesh& tableMesh, std::vector<st
         ballShader.setUniform("lightPos", light.getPosition());
         ballShader.setUniform("lightColor", light.getColor());
         ballShader.setUniform("viewPos", glm::vec3(view[3]));
+        ballShader.setUniform("ambientEnabled", ambientLight.enabled);
+        ballShader.setUniform("ambientColor", ambientLight.color);
+        ballShader.setUniform("ambientIntensity", ambientLight.intensity);
+        ballShader.setUniform("dirEnabled", dirLight.enabled);
+        ballShader.setUniform("dirDirection", dirLight.direction);
+        ballShader.setUniform("dirColor", dirLight.color);
+        ballShader.setUniform("dirIntensity", dirLight.intensity);
+        ballShader.setUniform("pointEnabled", pointLight.enabled);
+        ballShader.setUniform("pointPos", pointLight.position);
+        ballShader.setUniform("pointColor", pointLight.color);
+        ballShader.setUniform("pointIntensity", pointLight.intensity);
+        ballShader.setUniform("spotEnabled", spotLight.enabled);
+        ballShader.setUniform("spotPos", spotLight.position);
+        ballShader.setUniform("spotDir", spotLight.direction);
+        ballShader.setUniform("spotColor", spotLight.color);
+        ballShader.setUniform("spotIntensity", spotLight.intensity);
+        ballShader.setUniform("spotCutOff", spotLight.cutOff);
+        ballShader.setUniform("spotOuterCutOff", spotLight.outerCutOff);
+        ballShader.setUniform("spotConstant", spotLight.constant);
+        ballShader.setUniform("spotLinear", pointLight.linear);
+        ballShader.setUniform("spotQuadratic", pointLight.quadratic);
         glUniform1i(glGetUniformLocation(ballShader.getProgramId(), "useTexture"), 1);
         glm::mat4 modelBall = glm::mat4(1.0f);
         modelBall = glm::translate(modelBall, ballPositions[i]);
@@ -104,7 +214,10 @@ void Renderer::renderScene(const Camera& camera, Mesh& tableMesh, std::vector<st
     }
 }
 
-void Renderer::renderMinimap(const Camera& camera, Mesh& tableMesh, std::vector<std::shared_ptr<ObjModelLoader>>& poolBalls, std::vector<glm::vec3>& ballPositions, const Window& window, const Light& light) {
+void Renderer::renderMinimap(const Camera& camera, Mesh& tableMesh, std::vector<std::shared_ptr<ObjModelLoader>>& poolBalls,
+                           std::vector<glm::vec3>& ballPositions, const Window& window, const Light& light,
+                           const AmbientLight& ambientLight, const DirectionalLight& dirLight,
+                           const PointLight& pointLight, const SpotLight& spotLight) {
     setupMinimapViewport(window);
     int windowWidth, windowHeight;
     glfwGetFramebufferSize(window.getHandle(), &windowWidth, &windowHeight);
@@ -139,6 +252,27 @@ void Renderer::renderMinimap(const Camera& camera, Mesh& tableMesh, std::vector<
     mainShader.setUniform("lightPos", light.getPosition());
     mainShader.setUniform("lightColor", light.getColor());
     mainShader.setUniform("viewPos", glm::vec3(view[3]));
+    mainShader.setUniform("ambientEnabled", ambientLight.enabled);
+    mainShader.setUniform("ambientColor", ambientLight.color);
+    mainShader.setUniform("ambientIntensity", ambientLight.intensity);
+    mainShader.setUniform("dirEnabled", dirLight.enabled);
+    mainShader.setUniform("dirDirection", dirLight.direction);
+    mainShader.setUniform("dirColor", dirLight.color);
+    mainShader.setUniform("dirIntensity", dirLight.intensity);
+    mainShader.setUniform("pointEnabled", pointLight.enabled);
+    mainShader.setUniform("pointPos", pointLight.position);
+    mainShader.setUniform("pointColor", pointLight.color);
+    mainShader.setUniform("pointIntensity", pointLight.intensity);
+    mainShader.setUniform("spotEnabled", spotLight.enabled);
+    mainShader.setUniform("spotPos", spotLight.position);
+    mainShader.setUniform("spotDir", spotLight.direction);
+    mainShader.setUniform("spotColor", spotLight.color);
+    mainShader.setUniform("spotIntensity", spotLight.intensity);
+    mainShader.setUniform("spotCutOff", spotLight.cutOff);
+    mainShader.setUniform("spotOuterCutOff", spotLight.outerCutOff);
+    mainShader.setUniform("spotConstant", spotLight.constant);
+    mainShader.setUniform("spotLinear", pointLight.linear);
+    mainShader.setUniform("spotQuadratic", pointLight.quadratic);
     tableMesh.render();
 
     // Renderizar todas as bolas
@@ -153,6 +287,27 @@ void Renderer::renderMinimap(const Camera& camera, Mesh& tableMesh, std::vector<
         ballShader.setUniform("lightPos", light.getPosition());
         ballShader.setUniform("lightColor", light.getColor());
         ballShader.setUniform("viewPos", glm::vec3(view[3]));
+        ballShader.setUniform("ambientEnabled", ambientLight.enabled);
+        ballShader.setUniform("ambientColor", ambientLight.color);
+        ballShader.setUniform("ambientIntensity", ambientLight.intensity);
+        ballShader.setUniform("dirEnabled", dirLight.enabled);
+        ballShader.setUniform("dirDirection", dirLight.direction);
+        ballShader.setUniform("dirColor", dirLight.color);
+        ballShader.setUniform("dirIntensity", dirLight.intensity);
+        ballShader.setUniform("pointEnabled", pointLight.enabled);
+        ballShader.setUniform("pointPos", pointLight.position);
+        ballShader.setUniform("pointColor", pointLight.color);
+        ballShader.setUniform("pointIntensity", pointLight.intensity);
+        ballShader.setUniform("spotEnabled", spotLight.enabled);
+        ballShader.setUniform("spotPos", spotLight.position);
+        ballShader.setUniform("spotDir", spotLight.direction);
+        ballShader.setUniform("spotColor", spotLight.color);
+        ballShader.setUniform("spotIntensity", spotLight.intensity);
+        ballShader.setUniform("spotCutOff", spotLight.cutOff);
+        ballShader.setUniform("spotOuterCutOff", spotLight.outerCutOff);
+        ballShader.setUniform("spotConstant", spotLight.constant);
+        ballShader.setUniform("spotLinear", pointLight.linear);
+        ballShader.setUniform("spotQuadratic", pointLight.quadratic);
         glUniform1i(glGetUniformLocation(ballShader.getProgramId(), "useTexture"), 0);
         glm::mat4 modelWhite = glm::mat4(1.0f);
         modelWhite = glm::translate(modelWhite, ballPositions[0]);
@@ -161,12 +316,33 @@ void Renderer::renderMinimap(const Camera& camera, Mesh& tableMesh, std::vector<
     }
     // Renderizar bolas coloridas
     for (size_t i = 1; i < poolBalls.size(); ++i) {
-        ballShader.use();
-        ballShader.setMat4("view", view);
-        ballShader.setMat4("projection", proj);
-        ballShader.setUniform("lightPos", light.getPosition());
-        ballShader.setUniform("lightColor", light.getColor());
-        ballShader.setUniform("viewPos", glm::vec3(view[3]));
+    ballShader.use();
+    ballShader.setMat4("view", view);
+    ballShader.setMat4("projection", proj);
+    ballShader.setUniform("lightPos", light.getPosition());
+    ballShader.setUniform("lightColor", light.getColor());
+    ballShader.setUniform("viewPos", glm::vec3(view[3]));
+        ballShader.setUniform("ambientEnabled", ambientLight.enabled);
+        ballShader.setUniform("ambientColor", ambientLight.color);
+        ballShader.setUniform("ambientIntensity", ambientLight.intensity);
+        ballShader.setUniform("dirEnabled", dirLight.enabled);
+        ballShader.setUniform("dirDirection", dirLight.direction);
+        ballShader.setUniform("dirColor", dirLight.color);
+        ballShader.setUniform("dirIntensity", dirLight.intensity);
+        ballShader.setUniform("pointEnabled", pointLight.enabled);
+        ballShader.setUniform("pointPos", pointLight.position);
+        ballShader.setUniform("pointColor", pointLight.color);
+        ballShader.setUniform("pointIntensity", pointLight.intensity);
+        ballShader.setUniform("spotEnabled", spotLight.enabled);
+        ballShader.setUniform("spotPos", spotLight.position);
+        ballShader.setUniform("spotDir", spotLight.direction);
+        ballShader.setUniform("spotColor", spotLight.color);
+        ballShader.setUniform("spotIntensity", spotLight.intensity);
+        ballShader.setUniform("spotCutOff", spotLight.cutOff);
+        ballShader.setUniform("spotOuterCutOff", spotLight.outerCutOff);
+        ballShader.setUniform("spotConstant", spotLight.constant);
+        ballShader.setUniform("spotLinear", pointLight.linear);
+        ballShader.setUniform("spotQuadratic", pointLight.quadratic);
         glUniform1i(glGetUniformLocation(ballShader.getProgramId(), "useTexture"), 1);
         glm::mat4 modelBall = glm::mat4(1.0f);
         modelBall = glm::translate(modelBall, ballPositions[i]);
@@ -191,3 +367,8 @@ void Renderer::setupMinimapViewport(const Window& window) {
     
     glViewport(minimapX, minimapY, minimapWidth, minimapHeight);
 } 
+
+AmbientLight ambientLight;
+DirectionalLight dirLight;
+PointLight pointLight;
+SpotLight spotLight; 

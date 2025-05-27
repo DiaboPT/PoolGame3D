@@ -3160,7 +3160,7 @@ CMakeFiles/PoolGame3D.dir/src/common/Camera.cpp.o: /Users/italofilho/Documents/d
 CMakeFiles/PoolGame3D.dir/src/common/InputManager.cpp.o: /Users/italofilho/Documents/dev/P3D/PoolGame3D/src/common/InputManager.cpp \
   /Library/Developer/CommandLineTools/SDKs/MacOSX15.4.sdk/System/Library/Frameworks/OpenGL.framework/Headers/OpenGLAvailability.h \
   /Library/Developer/CommandLineTools/SDKs/MacOSX15.4.sdk/System/Library/Frameworks/OpenGL.framework/Headers/gl.h \
-  /Library/Developer/CommandLineTools/SDKs/MacOSX15.4.sdk/System/Library/Frameworks/OpenGL.framework/Headers/gltypes.h \
+  /Library/Developer/CommandLineTools/SDKs/MacOSX15.4.sdk/System/Library/Frameworks/OpenGL.framework/Headers/glu.h \
   /Library/Developer/CommandLineTools/SDKs/MacOSX15.4.sdk/usr/include/Availability.h \
   /Library/Developer/CommandLineTools/SDKs/MacOSX15.4.sdk/usr/include/AvailabilityInternal.h \
   /Library/Developer/CommandLineTools/SDKs/MacOSX15.4.sdk/usr/include/AvailabilityInternalLegacy.h \
@@ -4176,8 +4176,17 @@ CMakeFiles/PoolGame3D.dir/src/common/InputManager.cpp.o: /Users/italofilho/Docum
   /Users/italofilho/Documents/dev/P3D/PoolGame3D/include/glm/vec3.hpp \
   /Users/italofilho/Documents/dev/P3D/PoolGame3D/include/glm/vec4.hpp \
   /Users/italofilho/Documents/dev/P3D/PoolGame3D/include/glm/vector_relational.hpp \
+  /Users/italofilho/Documents/dev/P3D/PoolGame3D/src/header/App.h \
   /Users/italofilho/Documents/dev/P3D/PoolGame3D/src/header/Camera.h \
   /Users/italofilho/Documents/dev/P3D/PoolGame3D/src/header/InputManager.h \
+  /Users/italofilho/Documents/dev/P3D/PoolGame3D/src/header/Light.h \
+  /Users/italofilho/Documents/dev/P3D/PoolGame3D/src/header/Mesh.h \
+  /Users/italofilho/Documents/dev/P3D/PoolGame3D/src/header/ObjModelLoader.h \
+  /Users/italofilho/Documents/dev/P3D/PoolGame3D/src/header/Renderer.h \
+  /Users/italofilho/Documents/dev/P3D/PoolGame3D/src/header/Shader.h \
+  /Users/italofilho/Documents/dev/P3D/PoolGame3D/src/header/ShadersSources.h \
+  /Users/italofilho/Documents/dev/P3D/PoolGame3D/src/header/Window.h \
+  /opt/homebrew/include/GL/glew.h \
   /opt/homebrew/include/GLFW/glfw3.h
 
 CMakeFiles/PoolGame3D.dir/src/common/Light.cpp.o: /Users/italofilho/Documents/dev/P3D/PoolGame3D/src/common/Light.cpp \
@@ -13222,8 +13231,6 @@ CMakeFiles/PoolGame3D.dir/src/common/Window.cpp.o: /Users/italofilho/Documents/d
 /Library/Developer/CommandLineTools/SDKs/MacOSX15.4.sdk/usr/include/c++/v1/__math/min_max.h:
 
 /Library/Developer/CommandLineTools/SDKs/MacOSX15.4.sdk/usr/include/alloca.h:
-
-/Library/Developer/CommandLineTools/SDKs/MacOSX15.4.sdk/System/Library/Frameworks/OpenGL.framework/Headers/gltypes.h:
 
 /Library/Developer/CommandLineTools/SDKs/MacOSX15.4.sdk/usr/include/c++/v1/__algorithm/find_first_of.h:
 

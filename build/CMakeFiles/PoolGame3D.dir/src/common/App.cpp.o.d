@@ -1,6 +1,5 @@
 CMakeFiles/PoolGame3D.dir/src/common/App.cpp.o: \
   /Users/italofilho/Documents/dev/P3D/PoolGame3D/src/common/App.cpp \
-  /Users/italofilho/Documents/dev/P3D/PoolGame3D/src/header/App.h \
   /opt/homebrew/include/GL/glew.h \
   /Library/Developer/CommandLineTools/SDKs/MacOSX15.4.sdk/usr/include/c++/v1/cstddef \
   /Library/Developer/CommandLineTools/SDKs/MacOSX15.4.sdk/usr/include/c++/v1/__config \
@@ -68,6 +67,7 @@ CMakeFiles/PoolGame3D.dir/src/common/App.cpp.o: \
   /Library/Developer/CommandLineTools/SDKs/MacOSX15.4.sdk/System/Library/Frameworks/OpenGL.framework/Headers/gl.h \
   /opt/homebrew/include/GLFW/glfw3.h \
   /Library/Developer/CommandLineTools/usr/lib/clang/17/include/__stddef_rsize_t.h \
+  /Users/italofilho/Documents/dev/P3D/PoolGame3D/src/header/App.h \
   /Users/italofilho/Documents/dev/P3D/PoolGame3D/src/header/Renderer.h \
   /Users/italofilho/Documents/dev/P3D/PoolGame3D/include/glm/glm.hpp \
   /Users/italofilho/Documents/dev/P3D/PoolGame3D/include/glm/detail/_fixes.hpp \

@@ -1,9 +1,12 @@
+#include <GL/glew.h>  // GLEW deve vir primeiro
+#include <GLFW/glfw3.h>
 #include "InputManager.h"
+#include "App.h"
 #include <iostream>
 
 using namespace PoolGame3D;
 
-InputManager::InputManager() : window(nullptr), isRotating(false), lastMouseX(0.0), lastMouseY(0.0) {}
+InputManager::InputManager() : window(nullptr), camera(nullptr), app(nullptr), isRotating(false), lastMouseX(0.0), lastMouseY(0.0) {}
 
 InputManager::~InputManager() {}
 
@@ -40,9 +43,9 @@ void InputManager::initialize(GLFWwindow* win) {
     glfwSetScrollCallback(window, [](GLFWwindow* w, double xoffset, double yoffset) {
         auto* self = static_cast<InputManager*>(glfwGetWindowUserPointer(w));
         if (!self) return;
-        // Aqui você pode chamar métodos da câmera para zoom, por exemplo
-        // Exemplo: self->fov -= (float)yoffset;
-        // Clamp do fov pode ser feito aqui ou na câmera
+        if (self->camera) {
+            self->camera->zoom((float)yoffset);
+        }
     });
 
     // Key callback orientado a objeto
@@ -54,6 +57,17 @@ void InputManager::initialize(GLFWwindow* win) {
 }
 
 void InputManager::keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
+    if (action == GLFW_PRESS) {
+        // Sempre desativa todas as luzes antes de ativar a escolhida
+        app->ambientLight.enabled = false;
+        app->dirLight.enabled = false;
+        app->pointLight.enabled = false;
+        app->spotLight.enabled = false;
+        if (key == GLFW_KEY_1) app->ambientLight.enabled = true;
+        if (key == GLFW_KEY_2) app->dirLight.enabled = true;
+        if (key == GLFW_KEY_3) app->pointLight.enabled = true;
+        if (key == GLFW_KEY_4) app->spotLight.enabled = true;
+    }
     // ESC fecha a janela
     if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
         glfwSetWindowShouldClose(window, true);

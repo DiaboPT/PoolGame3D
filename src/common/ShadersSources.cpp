@@ -118,6 +118,30 @@ const char* fragmentShaderBall = R"(
     uniform bool useTexture;
     uniform sampler2D ballTexture;
     
+    // Uniforms
+    uniform bool ambientEnabled;
+    uniform vec3 ambientColor;
+    uniform float ambientIntensity;
+
+    uniform bool dirEnabled;
+    uniform vec3 dirDirection;
+    uniform vec3 dirColor;
+    uniform float dirIntensity;
+
+    uniform bool pointEnabled;
+    uniform vec3 pointPos;
+    uniform vec3 pointColor;
+    uniform float pointIntensity;
+    uniform float pointConstant, pointLinear, pointQuadratic;
+
+    uniform bool spotEnabled;
+    uniform vec3 spotPos;
+    uniform vec3 spotDir;
+    uniform vec3 spotColor;
+    uniform float spotIntensity;
+    uniform float spotCutOff, spotOuterCutOff;
+    uniform float spotConstant, spotLinear, spotQuadratic;
+    
     void main() {
         vec3 color;
         if (useTexture)
@@ -140,7 +164,48 @@ const char* fragmentShaderBall = R"(
         float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32);
         vec3 specular = specularStrength * spec * lightColor;
         
-        vec3 result = (ambient + diffuse + specular) * color;
+        vec3 result = vec3(0.0);
+
+        if (ambientEnabled)
+            result += ambientColor * ambientIntensity * color;
+
+        if (dirEnabled) {
+            vec3 dirLightDir = normalize(-dirDirection);
+            float diff = max(dot(norm, dirLightDir), 0.0);
+            vec3 diffuse = diff * dirColor * dirIntensity;
+            vec3 reflectDir = reflect(-dirLightDir, norm);
+            float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32);
+            vec3 specular = spec * dirColor * dirIntensity * 0.5;
+            result += (diffuse + specular) * color;
+        }
+
+        if (pointEnabled) {
+            vec3 pointLightDir = normalize(pointPos - FragPos);
+            float diff = max(dot(norm, pointLightDir), 0.0);
+            float distance = length(pointPos - FragPos);
+            float attenuation = 1.0 / (pointConstant + pointLinear * distance + pointQuadratic * (distance * distance));
+            vec3 diffuse = diff * pointColor * pointIntensity * attenuation;
+            vec3 reflectDir = reflect(-pointLightDir, norm);
+            float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32);
+            vec3 specular = spec * pointColor * pointIntensity * attenuation * 0.5;
+            result += (diffuse + specular) * color;
+        }
+
+        if (spotEnabled) {
+            vec3 spotLightDir = normalize(spotPos - FragPos);
+            float theta = dot(normalize(-spotDir), normalize(FragPos - spotPos));
+            float epsilon = spotCutOff - spotOuterCutOff;
+            float intensity = clamp((theta - spotOuterCutOff) / epsilon, 0.0, 1.0);
+            float diff = max(dot(norm, spotLightDir), 0.0);
+            float distance = length(spotPos - FragPos);
+            float attenuation = 1.0 / (spotConstant + spotLinear * distance + spotQuadratic * (distance * distance));
+            vec3 diffuse = diff * spotColor * spotIntensity * attenuation * intensity;
+            vec3 reflectDir = reflect(-spotLightDir, norm);
+            float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32);
+            vec3 specular = spec * spotColor * spotIntensity * attenuation * intensity * 0.5;
+            result += (diffuse + specular) * color;
+        }
+
         FragColor = vec4(result, 1.0);
     }
 )";
