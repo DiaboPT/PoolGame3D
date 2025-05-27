@@ -4,6 +4,7 @@
 #include <GL/glew.h>
 #include <glm/glm.hpp>
 #include <algorithm>
+#include <glm/ext/matrix_transform.hpp>
 
 namespace PoolGame3D {
 

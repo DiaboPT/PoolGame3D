@@ -121,7 +121,7 @@ using namespace std;
 // Variáveis globais para OpenGL
 GLuint shaderProgram = 0;
 GLuint VAO = 0, VBO = 0;
-GLuint sphereVAO, sphereVBO, sphereEBO;
+GLuint sphereVAO = 0, sphereVBO = 0;
 
 //vetor Bolas
 std::vector<ObjModelLoader> bolas;
@@ -381,86 +381,6 @@ void CreateParallelepipedMesh(GLuint& VAO, GLuint& VBO) {
     glBindVertexArray(0);
 }
 
-// Function to create a sphere mesh
-void CreateSphereMesh(GLuint& VAO, GLuint& VBO, GLuint& EBO, int sectorCount = 36, int stackCount = 18) {
-    std::vector<GLfloat> vertices;
-    std::vector<GLuint> indices;
-
-    float x, y, z, xy;                          // position
-    float nx, ny, nz, lengthInv = 1.0f;         // normal (optional)
-    float s, t;                                 // texture coord (optional)
-    float radius = 0.5f;
-
-    const float PI = 3.14159265359f;
-    float sectorStep = 2 * PI / sectorCount;
-    float stackStep = PI / stackCount;
-
-    for (int i = 0; i <= stackCount; ++i) {
-        float stackAngle = PI / 2 - i * stackStep;        // from pi/2 to -pi/2
-        xy = radius * cosf(stackAngle);
-        z = radius * sinf(stackAngle);
-
-        for (int j = 0; j <= sectorCount; ++j) {
-            float sectorAngle = j * sectorStep;
-
-            // vertex position (x, y, z)
-            x = xy * cosf(sectorAngle);
-            y = xy * sinf(sectorAngle);
-            vertices.push_back(x);
-            vertices.push_back(y);
-            vertices.push_back(z);
-
-            // color (use normalized position as color)
-            vertices.push_back((x + 0.5f));  // R
-            vertices.push_back((y + 0.5f));  // G
-            vertices.push_back((z + 0.5f));  // B
-        }
-    }
-
-    // Indices
-    for (int i = 0; i < stackCount; ++i) {
-        int k1 = i * (sectorCount + 1);
-        int k2 = k1 + sectorCount + 1;
-
-        for (int j = 0; j < sectorCount; ++j, ++k1, ++k2) {
-            if (i != 0) {
-                indices.push_back(k1);
-                indices.push_back(k2);
-                indices.push_back(k1 + 1);
-            }
-
-            if (i != (stackCount - 1)) {
-                indices.push_back(k1 + 1);
-                indices.push_back(k2);
-                indices.push_back(k2 + 1);
-            }
-        }
-    }
-
-    // OpenGL buffers
-    glGenVertexArrays(1, &VAO);
-    glGenBuffers(1, &VBO);
-    glGenBuffers(1, &EBO);
-
-    glBindVertexArray(VAO);
-
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(GLfloat), vertices.data(), GL_STATIC_DRAW);
-
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(GLuint), indices.data(), GL_STATIC_DRAW);
-
-    // Position
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (void*)0);
-    glEnableVertexAttribArray(0);
-
-    // Color
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (void*)(3 * sizeof(GLfloat)));
-    glEnableVertexAttribArray(1);
-
-    glBindVertexArray(0);
-}
-
 #pragma region Callbacks
 /// <summary>
 /// Method to handle when mouse button is pressed
@@ -595,6 +515,7 @@ int main() {
             return -1;
         }
 
+        // Initialize glew and checking if it is
         glewExperimental = GL_TRUE; 
         if (glewInit() != GLEW_OK) {
             std::cerr << "Failed to initialize GLEW!" << std::endl;
@@ -633,7 +554,6 @@ int main() {
             std::cerr << "Erro ao criar o texture shader program!" << std::endl;
             return -1;
         }
-
 
         if (VAO == 0) {
             std::cerr << "Erro ao criar o VAO!" << std::endl;

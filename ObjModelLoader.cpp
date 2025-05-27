@@ -81,7 +81,7 @@ namespace PoolGame3D {
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, textureID);
 
-        // Matriz de modelo (posição e orientação)
+        // Matriz de modelo (posiï¿½ï¿½o e orientaï¿½ï¿½o)
         glm::mat4 model = glm::translate(glm::mat4(1.0f), position);
         model = glm::rotate(model, orientation.y, glm::vec3(0, 1, 0));
         model = glm::rotate(model, orientation.x, glm::vec3(1, 0, 0));
@@ -95,7 +95,7 @@ namespace PoolGame3D {
         glBindVertexArray(0);
     }
 
-    // Função simples para carregar .obj (apenas triangulos, 1 material, sem grupos)
+    // Funï¿½ï¿½o simples para carregar .obj (apenas triangulos, 1 material, sem grupos)
     bool ObjModelLoader::LoadOBJ(const std::string& path, std::string& mtlFile) {
         std::ifstream file(path);
         
@@ -245,7 +245,7 @@ namespace PoolGame3D {
         return true;
     }
 
-    // Função simples para carregar .mtl (apenas map_Kd)
+    // Funï¿½ï¿½o simples para carregar .mtl (apenas map_Kd)
     bool ObjModelLoader::LoadMTL(const std::string& path, std::string& textureFile) {
         std::ifstream file(path);
 
