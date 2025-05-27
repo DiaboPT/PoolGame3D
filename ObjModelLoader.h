@@ -18,7 +18,7 @@ namespace PoolGame3D {
         // Envia os dados para a GPU (VAO, VBO, EBO, textura)
         void Install();
 
-        // Renderiza o modelo na posição e orientação desejada
+        // Renderiza o modelo na posiï¿½ï¿½o e orientaï¿½ï¿½o desejada
         void Render(const glm::vec3& position, const glm::vec3& orientation, GLuint shaderProgram, const glm::mat4& viewProj);
 
     private:
@@ -28,7 +28,7 @@ namespace PoolGame3D {
         GLuint VAO, VBO, EBO;
         GLuint textureID;
 
-        // Funções auxiliares
+        // Funï¿½ï¿½es auxiliares
         bool LoadOBJ(const std::string& path, std::string& mtlFile);
         bool LoadMTL(const std::string& path, std::string& textureFile);
         bool LoadTexture(const std::string& texturePath);

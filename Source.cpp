@@ -605,7 +605,10 @@ int main() {
         CreateParallelepipedMesh(VAO, VBO);
 
 		// Create a sphere mesh
-        CreateSphereMesh(sphereVAO, sphereVBO, sphereEBO);
+        for (int i = 1; i < bolas.size(); ++i) {
+            bolas[i].Load("PoolBalls\Ball" + std::to_string(i) + ".obj");
+            bolas[i].Install();
+        }
 
         // Loading the balls
         for (int i = 1; i <= 15; ++i)
@@ -728,16 +731,20 @@ int main() {
         glDrawArrays(GL_TRIANGLES, 0, 36);
 
 		// Render the sphere
-        glUseProgram(textureShaderProgram);
-        for (size_t i = 0; i < bolas.size(); ++i) {
-            glm::mat4 ballModel = glm::mat4(1.0f);
-            ballModel = glm::translate(ballModel, posicoesBolas[i]);
-            ballModel = glm::scale(ballModel, glm::vec3(0.1f)); // Scaling down the balls
-            glm::mat4 ballMVP = proj * view * ballModel;
 
-            bolas[i].Render(posicoesBolas[i], glm::vec3(0.0f), textureShaderProgram, proj* view);
+        // glUseProgram(textureShaderProgram);
+        // for (size_t i = 0; i < bolas.size(); ++i) {
+        //     glm::mat4 ballModel = glm::mat4(1.0f);
+        //     ballModel = glm::translate(ballModel, posicoesBolas[i]);
+        //     ballModel = glm::scale(ballModel, glm::vec3(0.1f)); // Scaling down the balls
+        //     glm::mat4 ballMVP = proj * view * ballModel;
+
+        //     bolas[i].Render(posicoesBolas[i], glm::vec3(0.0f), textureShaderProgram, proj* view);
+        // }
+
+        for (int i = 1; i < bolas.size(); ++i) {
+            bolas[i].Render(posicoesBolas[i], glm::vec3(0.0f, 0.0f, 0.0f), 0, view);
         }
-
 
         // --- Minimap Render ---
         // Calculate minimap viewport size & position (top-right corner)
