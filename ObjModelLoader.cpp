@@ -5,190 +5,157 @@
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
+#include "LoadShaders.h"
+#include "Camera.h"
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <glm/ext.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
 namespace PoolGame3D {
 
-    ObjModelLoader::ObjModelLoader() : VAO(0), VBO(0), EBO(0), textureID(0) {}
-    ObjModelLoader::~ObjModelLoader() {
-        if (VAO) glDeleteVertexArrays(1, &VAO);
-        if (VBO) glDeleteBuffers(1, &VBO);
-        if (EBO) glDeleteBuffers(1, &EBO);
-        if(textureID) glDeleteTextures(1, &textureID);
-    }
+    ObjModelLoader::ObjModelLoader() {}
+    ObjModelLoader::~ObjModelLoader() {}
 
-    bool ObjModelLoader::Load(const std::string& obj_model_filepath) {
+    void ObjModelLoader::Load(const std::string obj_model_filepath, GLuint sPos, GLuint sNormal, GLuint sTextCoord, GLuint textureBind, GLuint shader, int counter) {
         std::string mtlFile, textureFile;
+        this->shaderProgram = shader;
+        this->sPos = sPos;
+        this->sNormal = sNormal;
+        this->sTextCoord = sTextCoord;
+        this->textureBind = textureBind;
+		this->texCounter = counter;
 
         std::cout << "Loading OBJ: " << obj_model_filepath << std::endl;
-        if (!LoadOBJ(obj_model_filepath, mtlFile))
-        {
-            std::cerr << "Failed to load OBJ: " << obj_model_filepath << std::endl;
-            return false;
-        }
 
-        // Descobrir o caminho base
-        size_t lastSlash = obj_model_filepath.find_last_of("/\\");
-        std::string basePath = (lastSlash == std::string::npos) ? "" : obj_model_filepath.substr(0, lastSlash + 1);
-
-        std::cout << "Loading MTL: " << basePath + mtlFile << std::endl;
-        if (!LoadMTL(basePath + mtlFile, textureFile))
-        {
-            std::cerr << "Failed to load MTL: " << mtlFile << std::endl;
-            return false;
-        }
-
-        std::cout << "Loading texture: " << basePath + textureFile << std::endl;
-        if (!LoadTexture(basePath + textureFile))
-        {
-            std::cerr << "Failed to load texture: " << textureFile << std::endl;
-            return false;
-        }
-
-        return true;
-    }
+        LoadOBJ(obj_model_filepath);}
 
     void ObjModelLoader::Install() {
-        // Debug output
-        std::cout << "Installing model - Vertices: " << vertices.size() << ", Indices: " << indices.size() << std::endl;
 
-        glGenVertexArrays(1, &VAO);
-        glGenBuffers(1, &VBO);
-        glGenBuffers(1, &EBO);
+        GLfloat lPositions[8064 * 3 * 3];
+        GLfloat lNormals[8064 * 3 * 3];
+        GLfloat lTextureCoords[8064 * 2 * 3];
 
-        // Add validation checks
-        if (VAO == 0 || VBO == 0 || EBO == 0) {
-            std::cerr << "Failed to generate OpenGL buffers!" << std::endl;
-            return;
+        std::cout << "Number of positions : " << vertexIndices.size() << std::endl;
+        std::cout << "Number of normals : " << normalIndices.size() << std::endl;
+        std::cout << "Number of texCoords : " << texcoordIndices.size() << std::endl;
+    
+        for (int i = 0; i < vertexIndices.size(); ++i) {
+            // Vertex
+            lPositions[i * 3] = vertexIndices[i].x;
+            lPositions[i * 3 + 1] = vertexIndices[i].y;
+            lPositions[i * 3 + 2] = vertexIndices[i].z;
+
+            // Normals
+            lNormals[i * 3] = normalIndices[i].x;
+            lNormals[i * 3 + 1] = normalIndices[i].y;
+            lNormals[i * 3 + 2] = normalIndices[i].z;
+
+            // Texture Coords
+            lTextureCoords[i * 2] = texcoordIndices[i].x;
+            lTextureCoords[i * 2 + 1] = texcoordIndices[i].y;
         }
 
+        glGenVertexArrays(1, &VAO);
+        glBindVertexArray(VAO);
+        glGenBuffers(3, VBO);
+                
+
+        
         GLenum err = glGetError();
         if (err != GL_NO_ERROR) {
             std::cerr << "OpenGL error after VAO creation: " << err << std::endl;
         }
 
-        std::cout << "Generated VAO: " << VAO << ", VBO: " << VBO << ", EBO: " << EBO << std::endl;
+        for (int i = 0; i < 3; ++i) {
+            glBindBuffer(GL_ARRAY_BUFFER, VBO[i]);
 
-        glBindVertexArray(VAO);
-        glBindBuffer(GL_ARRAY_BUFFER, VBO);
-        glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), vertices.data(), GL_STATIC_DRAW);
+            if (i == 0) glBufferStorage(GL_ARRAY_BUFFER, sizeof(lPositions), lPositions, 0);
 
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), indices.data(), GL_STATIC_DRAW);
+            if (i == 1) glBufferStorage(GL_ARRAY_BUFFER, sizeof(lNormals), lNormals, 0);
 
-        // pos(3), normal(3), texcoord(2)
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
-        glEnableVertexAttribArray(0);
-        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
-        glEnableVertexAttribArray(1);
-        glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
-        glEnableVertexAttribArray(2);
-
-        glBindVertexArray(0);
-        
-        GLenum err2 = glGetError();
-        if (err2 != GL_NO_ERROR) {
-            std::cerr << "OpenGL error after Install(): " << err2 << std::endl;
+            if (i == 2) glBufferStorage(GL_ARRAY_BUFFER, sizeof(lTextureCoords), lTextureCoords, 0);
         }
+
+
+        // Upload vertex data
+        glBindBuffer(GL_ARRAY_BUFFER, VBO[0]);
+        glVertexAttribPointer(sPos, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+        
+        glBindBuffer(GL_ARRAY_BUFFER, VBO[1]);
+        glVertexAttribPointer(sNormal, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+
+        glBindBuffer(GL_ARRAY_BUFFER, VBO[2]);
+        glVertexAttribPointer(sTextCoord, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
+
+        glEnableVertexAttribArray(sPos);
+        glEnableVertexAttribArray(sNormal);
+        glEnableVertexAttribArray(sTextCoord);
+
+        glProgramUniform1i(shaderProgram, textureBind, 0);
     }
 
-    void ObjModelLoader::Render(const glm::vec3& position, const glm::vec3& orientation, GLuint shaderProgram, const glm::mat4& viewProj) {
-        if (VAO == 0) {
-            std::cerr << "Render error: VAO not properly initialized!" << std::endl;
-            return;
-        }
-        
-        // Check if shader program is valid
-        if (!glIsProgram(shaderProgram)) {
-            std::cerr << "Render error: Invalid shader program!" << std::endl;
-            return;
-        }
+    void ObjModelLoader::Render(glm::vec3 position, glm::vec3 orientation, glm::mat4 modelMatrix) {
+        using namespace glm;
 
-        if (!glIsVertexArray(VAO)) {
-            std::cerr << "VAO " << VAO << " is not a valid vertex array!" << std::endl;
-            return;
-        }
-        
-        if (vertices.empty() || indices.empty()) {
-            std::cerr << "No geometry data to render!" << std::endl;
-            return;
-        }
-
-        if (VAO == 0 || textureID == 0) {
-            std::cerr << "Render error: ";
-            if (VAO == 0) std::cerr << "VAO not initialized";
-            if (textureID == 0) std::cerr << "Texture not loaded";
-            std::cerr << std::endl;
-            return;
-        }
-
-        glUseProgram(shaderProgram);
-        GLuint mvpLoc = glGetUniformLocation(shaderProgram, "MVP");
-        if (mvpLoc == -1) {
-            std::cerr << "Shader uniform MVP not found!" << std::endl;
-            return;
-        }
-        
-        glBindVertexArray(VAO);
-        glActiveTexture(GL_TEXTURE0);
-
-        std::cout << "VAO ID: " << VAO << std::endl;
-
-        if (glIsTexture(textureID)) {
-            glBindTexture(GL_TEXTURE_2D, textureID);
-        }
-        else {
-            std::cerr << "Invalid texture ID: " << textureID << std::endl;
-            return;
-        }
-        
         // Matriz de modelo (posi��o e orienta��o)
-        glm::mat4 model = glm::translate(glm::mat4(1.0f), position);
-        model = glm::rotate(model, orientation.y, glm::vec3(0, 1, 0));
-        model = glm::rotate(model, orientation.x, glm::vec3(1, 0, 0));
-        model = glm::rotate(model, orientation.z, glm::vec3(0, 0, 1));
-        glm::mat4 mvp = viewProj * model;
+        mat4 tempModel = modelMatrix;
+        tempModel = translate(tempModel, position);
 
-        
-        glUniformMatrix4fv(mvpLoc, 1, GL_FALSE, &mvp[0][0]);
+        tempModel = rotate(tempModel, radians(orientation.x), vec3(1, 0, 0));
+        tempModel = rotate(tempModel, radians(orientation.y), vec3(0, 1, 0));
+        tempModel = rotate(tempModel, radians(orientation.z), vec3(0, 0, 1));
 
-        glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
-        glBindVertexArray(0);
+        GLint modelId = glGetProgramResourceLocation(shaderProgram, GL_UNIFORM, "Model");
+        glProgramUniformMatrix4fv(shaderProgram, modelId, 1, GL_FALSE, value_ptr(tempModel));
+
+        mat4 modelView = cam::Camera::GetInstance()->view * tempModel;
+        GLint modelViewId = glGetProgramResourceLocation(shaderProgram, GL_UNIFORM, "ModelView");
+        glProgramUniformMatrix4fv(shaderProgram, modelViewId, 1, GL_FALSE, value_ptr(modelView));
+
+        mat3 normalMatrix = glm::inverseTranspose(glm::mat3(modelView));
+        GLint normalMatrixId = glGetProgramResourceLocation(shaderProgram, GL_UNIFORM, "NormalMatrix");
+        glProgramUniformMatrix4fv(shaderProgram, normalMatrixId, 1, GL_FALSE, value_ptr(normalMatrix));
+
+        GLint viewId = glGetProgramResourceLocation(shaderProgram, GL_UNIFORM, "View");
+        glProgramUniformMatrix4fv(shaderProgram, viewId, 1, GL_FALSE, value_ptr(cam::Camera::GetInstance()->view));
+
+        GLint projectionId = glGetProgramResourceLocation(shaderProgram, GL_UNIFORM, "Projection");
+        glProgramUniformMatrix4fv(shaderProgram, projectionId, 1, GL_FALSE, value_ptr(cam::Camera::GetInstance()->projection));
+
+        glBindTexture(GL_TEXTURE_2D, textureID + 1);
+
+        glBindVertexArray(VAO);
+
+        glDrawArrays(GL_TRIANGLES, 0, vertexIndices.size());
     }
 
     // Fun��o simples para carregar .obj (apenas triangulos, 1 material, sem grupos)
-    bool ObjModelLoader::LoadOBJ(const std::string& path, std::string& mtlFile) {
-        std::ifstream file(path);
+    void ObjModelLoader::LoadOBJ(const std::string& path) {
+        using namespace std;
+
+        ifstream file(path);
         
         if (!file.is_open()) {
-            std::cerr << "Erro ao abrir arquivo OBJ: " << path << std::endl;
-            return false;
+            cerr << "Erro ao abrir arquivo OBJ: " << path << endl;
         }        
 
-        std::vector<glm::vec3> temp_positions;
-        std::vector<glm::vec3> temp_normals;
-        std::vector<glm::vec2> temp_texcoords;
-        std::vector<unsigned int> vertexIndices, normalIndices, texcoordIndices;
+        vector<glm::vec3> temp_positions;
+        vector<glm::vec3> temp_normals;
+        vector<glm::vec2> temp_texcoords;       
 
-        // Error debug
-        bool hasNormals = false;
-        bool hasTextcoords = false;
-        bool hasFaces = false;
-        mtlFile.clear();
-
-        std::string line;
-        while (std::getline(file, line)) {
+        string line;
+        while (getline(file, line)) {
             if (line.empty()) continue;
 
-            std::istringstream iss(line);
-            std::string prefix;
+            istringstream iss(line);
+            string prefix;
             iss >> prefix;
                         
             if (prefix == "mtllib") {
-                if (!(iss >> mtlFile))
-                    std::cerr << "Warning: MTL file declaration malformed in " << path << std::endl;
+                string mtlFile;
+                iss >> mtlFile;
+                ObjModelLoader::LoadMTL(mtlFile);
             }
             else if (prefix == "v") { // Vertex position
                 glm::vec3 pos;
@@ -199,126 +166,59 @@ namespace PoolGame3D {
                 glm::vec3 norm;
                 if (iss >> norm.x >> norm.y >> norm.z) {
                     temp_normals.push_back(norm);
-                    hasNormals = true;
                 }
             }
             else if (prefix == "vt") { // Vertex coordinate
                 glm::vec2 tex;
                 if (iss >> tex.x >> tex.y) {
                     temp_texcoords.push_back(tex);
-                    hasTextcoords = true;
                 }
             }
             else if (prefix == "f") { // Face
-                hasFaces = true;
-                std::string vertexStr;
-                for (int i = 0; i < 3; ++i) {
-                    if (!(iss >> vertexStr)) break;
+                string vertexStr;
+                for (int i = 0; i < 3; ++i)
+                {
+                    string vertexData;
+                    iss >> vertexData;
 
-                    std::replace(vertexStr.begin(), vertexStr.end(), '/', ' ');
-                    std::istringstream viss(vertexStr);
+                    istringstream viss(vertexData);
+                    string index;
 
-                    unsigned int v, t = 0, n = 0;
-                    viss >> v;
+                    getline(viss, index, '/');
+                    int positionIndex = stoi(index) - 1;
 
-                    if (hasTextcoords) viss >> t;
-                    if (hasNormals) viss >> n;
+                    getline(viss, index, '/');
+                    int texcoordIndex = stoi(index) - 1;
 
-                    if (v > 0) {
-                        vertexIndices.push_back(v - 1);
-                        if (t > 0) texcoordIndices.push_back(t - 1);
-                        if (n > 0) normalIndices.push_back(n - 1);
-                    }
+                    getline(viss, index, '/');
+                    int normalIndex = stoi(index) - 1;
+
+                    vertexIndices.push_back(temp_positions[positionIndex]);
+                    normalIndices.push_back(temp_normals[normalIndex]);
+                    texcoordIndices.push_back(temp_texcoords[texcoordIndex]);
                 }
-
-                /*unsigned int v[3], t[3], n[3];
-                char slash;
-                for (int i = 0; i < 3; ++i) {
-                    iss >> v[i] >> slash >> t[i] >> slash >> n[i];
-                    vertexIndices.push_back(v[i]);
-                    texcoordIndices.push_back(t[i]);
-                    normalIndices.push_back(n[i]);
-                }*/
             }
         }
+
+        std::cout << temp_positions.size() << endl;
+        std::cout << temp_normals.size() << endl;
+        std::cout << temp_texcoords.size() << endl;
+
+        std::cout << vertexIndices.size() << endl;
+        std::cout << normalIndices.size() << endl;
+        std::cout << texcoordIndices.size() << endl;
+
         file.close();
-
-        // Validation
-        if (temp_positions.empty()) {
-            std::cerr << "Error: No vertices found in " << path << std::endl;
-            return false;
-        }
-
-        if (!hasFaces) {
-            std::cerr << "Error: No faces found in " << path << std::endl;
-            return false;
-        }
-
-        // Reorganizar os dados para OpenGL
-        vertices.clear();
-        indices.clear();
-
-        try {
-            for (size_t i = 0; i < vertexIndices.size(); ++i) {
-                /*glm::vec3 pos = temp_positions[vertexIndices[i] - 1];
-                glm::vec3 norm = temp_normals[normalIndices[i] - 1];
-                glm::vec2 tex = temp_texcoords[texcoordIndices[i] - 1];*/
-
-                // Position
-                const auto& pos = temp_positions.at(vertexIndices.at(i));
-                vertices.push_back(pos.x);
-                vertices.push_back(pos.y);
-                vertices.push_back(pos.z);
-
-                // Normal
-                if (hasNormals && i < normalIndices.size()) {
-                    const auto& norm = temp_normals.at(normalIndices.at(i));
-                    vertices.push_back(norm.x);
-                    vertices.push_back(norm.y);
-                    vertices.push_back(norm.z);
-                }
-                else {
-                    vertices.insert(vertices.end(), { 0, 0, 0 }); // Default normal
-                }
-
-                // Texture coordinate (option)
-                if (hasTextcoords && i < texcoordIndices.size()) {
-                    const auto& tex = temp_texcoords.at(texcoordIndices.at(i));
-                    vertices.push_back(tex.x);
-                    vertices.push_back(tex.y);
-                }
-                else {
-                    vertices.insert(vertices.end(), { 0, 0 }); // Default UVs
-                }
-
-                indices.push_back(i);
-            }
-        }
-        catch (const std::out_of_range& e) {
-            std::cerr << "Error: Index out of range in " << path << ": " << e.what() << std::endl;
-            return false;
-        }
-
-        std::cout << "Loaded OBJ: " << path
-            << "(Verts: " << temp_positions.size()
-            << ", Normals: " << temp_normals.size()
-            << ", UVs: " << temp_texcoords.size()
-            << ", Faces: " << vertexIndices.size() / 3 << ")" << std::endl;
-
-        return true;
     }
 
     // Fun��o simples para carregar .mtl (apenas map_Kd)
-    bool ObjModelLoader::LoadMTL(const std::string& path, std::string& textureFile) {
-        std::ifstream file(path);
+    void ObjModelLoader::LoadMTL(const std::string& materialFile) {
+        std::ifstream file("PoolBalls/" + materialFile);
 
+        std::cout << "lOADING MTL: " << materialFile << std::endl << std::endl;            
         if (!file.is_open()) {
-            std::cerr << "Erro ao abrir arquivo MTL: " << path << std::endl;
-            return false;
-        }       
-
-        textureFile.clear();
-        bool foundTexture = false;
+            std::cerr << "Erro ao abrir arquivo MTL: " << std::endl;            
+        }               
 
         std::string line;
         while (std::getline(file, line)) {
@@ -326,56 +226,61 @@ namespace PoolGame3D {
             std::string prefix;
             iss >> prefix;
 
-            if (prefix == "map_Kd") {
-                iss >> textureFile;
-                foundTexture = true;
+            if (prefix == "Ka")
+            {
+                iss >> ka.x >> ka.y >> ka.z;
+            }
+            else if (prefix == "Kd")
+            {
+                iss >> kd.x >> kd.y >> kd.z;
+            }
+            else if (prefix == "Ks")
+            {
+                iss >> ks.x >> ks.y >> ks.z;
+            }
+            else if (prefix == "Ns")
+            {
+                iss >> ns;
+            }
+            else if (prefix == "map_Kd") {
+                std::string textFileName;
+                iss >> textFileName;
+                LoadTexture("PoolBalls/" + textFileName);
             }
         }
         file.close();
-
-        if (!foundTexture) {
-            std::cerr << "WARNING: No diffuse texture (map_Kd) found in " << path << std::endl;
-        } else
-            std::cout << "Found texture in MTL: " << textureFile << std::endl;
-
-        return foundTexture;
     }
 
     // Carrega textura usando stb_image
-    bool ObjModelLoader::LoadTexture(const std::string& texturePath) {
-        int width, height, nrChannels;
-        unsigned char* data = stbi_load(texturePath.c_str(), &width, &height, &nrChannels, 0);
+    void ObjModelLoader::LoadTexture(const std::string& texturePath) {
         
-        if (!stbi_info(texturePath.c_str(), &width, &height, &nrChannels)) {
-            std::cerr << "Cannot read texture info: " << texturePath << " - " << stbi_failure_reason() << std::endl;
-            return false;
-        }
+        glActiveTexture(GL_TEXTURE0);
+
+        GLuint id = texCounter;
+        textureID = id;
         
-        if (!data) {
-            std::cerr << "Falha ao carregar textura: " << texturePath << std::endl;
-            return false;
-        }
         glGenTextures(1, &textureID);
         glBindTexture(GL_TEXTURE_2D, textureID);
 
-        GLenum format = (nrChannels == 4) ? GL_RGBA : GL_RGB;
-        glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
-
-        glGenerateMipmap(GL_TEXTURE_2D);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-        stbi_image_free(data);
+        int width, height, nrChannels;
+        stbi_set_flip_vertically_on_load(true);
 
-        if (textureID == 0) {
-            std::cerr << "Error: Texture failed to load from: " << texturePath << std::endl;
-            return false;
+        unsigned char* data = stbi_load(texturePath.c_str(), &width, &height, &nrChannels, 0);        
+        
+        if (data) {
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0,
+                        nrChannels == 4 ? GL_RGBA : GL_RGB, GL_UNSIGNED_BYTE, data);
+            
+            glGenerateMipmap(GL_TEXTURE_2D);
+
+            stbi_image_free(data);
         }
-        std::cout << "Texture loaded successfully (ID" << textureID << ") from " << texturePath << std::endl;
-
-        return true;
+        else std::cerr << "Falha ao carregar textura: " << texturePath << " - " << stbi_failure_reason() << std::endl;
     }
 
 } // namespace PoolGame3D
