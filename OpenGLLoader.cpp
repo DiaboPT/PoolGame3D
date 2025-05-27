@@ -1,5 +1,5 @@
 // OpenGLLoader.cpp
-#include "OpenGLLoader.h"
+#include "Header.h"
 
 #ifdef _WIN32
 #include <windows.h>

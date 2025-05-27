@@ -38,5 +38,16 @@
     <ClInclude Include="ObjModelLoader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Header.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="shader.vert">
+      <Filter>Shaders Files</Filter>
+    </None>
+    <None Include="shader.frag">
+      <Filter>Shaders Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

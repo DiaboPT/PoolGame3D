@@ -1,46 +1,20 @@
-#pragma once  
-#include <string>  
-#include <vector>  
-#include <GL/glew.h>  
-#include <glm/glm.hpp>  
-#include <glm/ext/matrix_transform.hpp>  
+#pragma once
+#include "Header.h"
 
-namespace PoolGame3D {  
+class ObjModelLoader {
+public:
+    ObjModelLoader();
+    ~ObjModelLoader();
 
-  class ObjModelLoader {  
-  public:  
-      ObjModelLoader();  
-      ~ObjModelLoader();  
+    bool Load(const std::string obj_model_filepath);
+    void Install();
+    void Render(glm::vec3 position, glm::vec3 orientation);
 
-      // Carrega o modelo .obj e o .mtl associado  
-      bool Load(const std::string& obj_model_filepath);  
+private:
+    std::vector<glm::vec3> vertices;
+    std::vector<glm::vec2> uvs;
+    std::vector<glm::vec3> normals;
 
-      // Envia os dados para a GPU (VAO, VBO, EBO, textura)  
-      void Install();  
-
-      // Renderiza o modelo na posição e orientação desejada  
-      void Render(const glm::vec3& position, const glm::vec3& orientation, GLuint shaderProgram, const glm::mat4& viewProj);  
-
-      // Make LoadTexture accessible  
-      bool LoadTexture(const std::string& texturePath);  
-
-      // New method to retrieve the shader program
-      GLuint GetShaderProgram() const;
-
-	  // New method to set the shader program
-	  void SetShaderProgram(GLuint program);
-
-  private:  
-      // Dados do modelo  
-      std::vector<float> vertices; // pos(3), normal(3), texcoord(2)  
-      std::vector<unsigned int> indices;  
-      GLuint VAO, VBO, EBO;  
-      GLuint textureID;  
-      GLuint shaderProgram; // Store the shader program ID  
-
-      // Funções auxiliares  
-      bool LoadOBJ(const std::string& path, std::string& mtlFile);  
-      bool LoadMTL(const std::string& path, std::string& textureFile);  
-  };  
-
-} // namespace PoolGame3D
+    GLuint vao = 0, vbo_vertices = 0, vbo_uvs = 0, vbo_normals = 0;
+    GLuint textureID = 0;
+};
