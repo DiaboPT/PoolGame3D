@@ -20,7 +20,7 @@ float verticesPositions[verticesN] = {
     -0.5f, -0.5f, -0.5f,
     -0.5f, -0.5f, +0.5f,
     -0.5f, +0.5f, -0.5f,
-    -0.5f, +0.5f, -0.5f,
+    -0.5f, -0.5f, -0.5f,
     -0.5f, -0.5f, +0.5f,
     -0.5f, +0.5f, +0.5f,
 
@@ -58,77 +58,150 @@ float verticesPositions[verticesN] = {
 };
 
 float verticesNormals[verticesN] = {
-
-    // +X Direita
-    +1.0f, +0.0f, +0.0f,
-    +1.0f, +0.0f, +0.0f,
-    +1.0f, +0.0f, +0.0f,
-    +1.0f, +0.0f, +0.0f,
-    +1.0f, +0.0f, +0.0f,
-    +1.0f, +0.0f, +0.0f,
-
-    // -X Esquerda
-    +0.0f, +1.0f, +0.0f,
-    +0.0f, +1.0f, +0.0f,
-    +0.0f, +1.0f, +0.0f,
-    +0.0f, +1.0f, +0.0f,
-    +0.0f, +1.0f, +0.0f,
-    +0.0f, +1.0f, +0.0f,
-
-    // +Y Cima Verde
-    +0.0f, +0.3f, +0.0f,
-    +0.0f, +0.3f, +0.0f,
-    +0.0f, +0.3f, +0.0f,
-    +0.0f, +0.3f, +0.0f,
-    +0.0f, +0.3f, +0.0f,
-    +0.0f, +0.3f, +0.0f,
-
-    // -Y Baixo
-    +1.0f, +1.0f, +0.0f,
-    +1.0f, +1.0f, +0.0f,
-    +1.0f, +1.0f, +0.0f,
-    +1.0f, +1.0f, +0.0f,
-    +1.0f, +1.0f, +0.0f,
-    +1.0f, +1.0f, +0.0f,
-
-    // +Z Frente
-    +1.0f, +1.0f, +1.0f,
-    +1.0f, +1.0f, +1.0f,
-    +1.0f, +1.0f, +1.0f,
-    +1.0f, +1.0f, +1.0f,
-    +1.0f, +1.0f, +1.0f,
-    +1.0f, +1.0f, +1.0f,
-
-    // -Z Trás
-    +0.0f, +1.0f, +1.0f,
-    +0.0f, +1.0f, +1.0f,
-    +0.0f, +1.0f, +1.0f,
-    +0.0f, +1.0f, +1.0f,
-    +0.0f, +1.0f, +1.0f,
-    +0.0f, +1.0f, +1.0f
+    // +X
+    1,0,0, 1,0,0, 1,0,0, 1,0,0, 1,0,0, 1,0,0,
+    // -X
+    -1,0,0, -1,0,0, -1,0,0, -1,0,0, -1,0,0, -1,0,0,
+    // +Y
+    0,1,0, 0,1,0, 0,1,0, 0,1,0, 0,1,0, 0,1,0,
+    // -Y
+    0,-1,0, 0,-1,0, 0,-1,0, 0,-1,0, 0,-1,0, 0,-1,0,
+    // +Z
+    0,0,1, 0,0,1, 0,0,1, 0,0,1, 0,0,1, 0,0,1,
+    // -Z
+    0,0,-1, 0,0,-1, 0,0,-1, 0,0,-1, 0,0,-1, 0,0,-1
 };
 
-float vertices[36 * 8]; // 8 floats per vertex: 3 pos + 3 normal + 2 uv
+float vertices[36 * 8]; // 8 floats per vertex: 3 pos + 3 normal
+
+// Camera
+float cameraDistance = 5.0f;
+float cameraPitch = -30.0f;
+float cameraYaw = 0.0f;
+float fov = 45.0f;
+
+bool isRotating = false;
+double lastX = 0.0f, lastY = 0.0f;
+
+void MouseButtonCallback(GLFWwindow* window, int button, int action, int mods) {
+    if (button == GLFW_MOUSE_BUTTON_LEFT) {
+        if (action == GLFW_PRESS) {
+            isRotating = true;
+            glfwGetCursorPos(window, &lastX, &lastY);
+        }
+        else if (action == GLFW_RELEASE) {
+            isRotating = false;
+        }
+    }
+}
+
+void MouseCallback(GLFWwindow* window, double xpos, double ypos) {
+    if (!isRotating) return;
+
+    float sensitivity = 0.1f;
+    float xoffset = xpos - lastX;
+    float yoffset = lastY - ypos;
+
+    lastX = xpos;
+    lastY = ypos;
+
+    cameraYaw += xoffset * sensitivity;
+    cameraPitch += yoffset * sensitivity;
+
+    // Clamp pitch to prevent flipping
+    if (cameraPitch > 30.0f) cameraPitch = 30.0f;
+    if (cameraPitch < 30.0f) cameraPitch = -30.0f;
+}
+
+void ScrollCallback(GLFWwindow* window, double xoffset, double yoffset) {
+    fov -= (float)yoffset;
+
+    if (fov < 20.0f)
+        fov = 20.0f;
+    if (fov > 45.0f)
+        fov = 45.0f;
+}
 
 int main() {
-    // GLFW + GLEW init
-    if (!glfwInit()) return -1;
 
-    GLFWwindow* window = glfwCreateWindow(800, 600, "OBJ Loader Example", nullptr, nullptr);
+    // Initialize OpenGL context
+    GLFWwindow* window = nullptr;
+
+    // Set up window size
+    const int WIDTH = 800;
+    const int HEIGHT = 600;
+
+    // Set up window title
+    const char* TITLE = "3D Pool Game";
+
+    // Checks if OpenGL is initialized
+    if (!glfwInit()) {
+        std::cerr << "Failed to initialize GLFW!" << std::endl;
+        return -1;
+    }
+
+    // Set up hints for OpenGL context
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
+    // Creates a window:
+    // - size (WIDTH x HEIGHT)
+    // - title (TITLE)
+    // - monitor (monitor default)
+    // - windowed mode (window)
+    window = glfwCreateWindow(WIDTH, HEIGHT, TITLE, nullptr, nullptr);
+
     if (!window) {
+        std::cerr << "Failed to create GLFW window!" << std::endl;
         glfwTerminate();
         return -1;
     }
+
     glfwMakeContextCurrent(window);
-    if (glewInit() != GLEW_OK) return -1;
+    glfwSetCursorPos(window, WIDTH * 0.5f, HEIGHT * 0.5f);
+    glfwSetMouseButtonCallback(window, MouseButtonCallback);
+    glfwSetCursorPosCallback(window, MouseCallback);
+    glfwSetScrollCallback(window, ScrollCallback);
+
+    // Checks if OpenGL Library is loaded
+    if (!LoadOpenGLLibrary()) {
+        std::cerr << "Failed to load OpenGL library!" << std::endl;
+        glfwDestroyWindow(window);
+        glfwTerminate();
+        return -1;
+    }
+
+    glewExperimental = GL_TRUE;
+    if (glewInit() != GLEW_OK) {
+        std::cerr << "Failed to initialize GLEW!" << std::endl;
+        return -1;
+    }
+
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
+    glFrontFace(GL_CCW);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glDisable(GL_CULL_FACE);
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+    glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
+    glfwSetInputMode(window, GLFW_STICKY_MOUSE_BUTTONS, GL_TRUE);
+    glViewport(0, 0, WIDTH, HEIGHT);
+    glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 
     // Load shader
-    GLuint shaderProgram = LoadShaders("shader.vert", "shader.frag");
+    GLuint shaderProgram = LoadShaders("glsl shader.vert", "glsl shader.frag");
+    if (shaderProgram == 0) {
+        std::cerr << "Erro ao criar o shader program!" << std::endl;
+        return -1;
+    }
 
     // Load model
     std::vector<ObjModelLoader> balls;
-    ObjModelLoader model;
     for (int i = 0; i <= 14; i++) {
+        ObjModelLoader model;
         if (!model.Load("PoolBalls/Ball" + std::to_string(i +1) + ".obj")) {
             return -1;
         }
@@ -136,14 +209,6 @@ int main() {
         model.Install();
         balls.push_back(model);
     }
-
-    // Matrices
-    glm::mat4 projection = glm::perspective(glm::radians(45.0f), 800.f / 600.f, 0.1f, 100.0f);
-    glm::mat4 view = glm::lookAt(
-        glm::vec3(0, 5, 10), // Camera position
-        glm::vec3(0, 0, 0), // Look at
-        glm::vec3(0, 1, 0)  // Up
-    );
 
     for (int i = 0; i < 36; ++i) {
         vertices[i * 8 + 0] = verticesPositions[i * 3 + 0];
@@ -166,8 +231,6 @@ int main() {
     // Position
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
-
-    // Normal
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
     glEnableVertexAttribArray(1);
 
@@ -181,28 +244,101 @@ int main() {
         glEnable(GL_DEPTH_TEST);
 
         glUseProgram(shaderProgram);
+        // Set up the projection and view matrices
+        glm::mat4 proj = glm::perspective(glm::radians(fov), WIDTH / (float)HEIGHT, 0.1f, 100.0f);
 
-        // Compute matrices
-        glm::mat4 modelMatrix = glm::mat4(1.0f);
-        glm::mat4 mvp = projection * view * modelMatrix;
+        // Moving the world
+        //glm::mat4 view = glm::lookAt(glm::vec3(2, 2, 2), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
+        glm::vec3 direction{};
+        direction.x = cos(glm::radians(cameraYaw)) * cos(glm::radians(cameraPitch));
+        direction.y = sin(glm::radians(cameraPitch));
+        direction.z = sin(glm::radians(cameraYaw)) * cos(glm::radians(cameraPitch));
+        glm::vec3 cameraTarget = glm::normalize(direction);
 
-        // Set uniforms
+        glm::vec3 cameraPos = -cameraTarget * cameraDistance;
+        glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
+
+        glm::mat4 view = glm::lookAt(cameraPos, glm::vec3(0.0f), cameraUp);
+
+        glm::mat4 model = glm::mat4(1.0f);
+
+        // Scale da Mesa 
+        model = glm::scale(model, glm::vec3(1.5f, 0.3f, 3.0f));
+        glm::mat4 mvp = proj * view * model;
+
+        // Set the MVP matrix in the shader
         GLuint mvpLoc = glGetUniformLocation(shaderProgram, "u_MVP");
-        glUniformMatrix4fv(mvpLoc, 1, GL_FALSE, &mvp[0][0]);
+        glUniformMatrix4fv(mvpLoc, 1, GL_FALSE, glm::value_ptr(mvp));
 
-        GLuint texLoc = glGetUniformLocation(shaderProgram, "u_Texture");
-        glUniform1i(texLoc, 0); // Texture unit 0
+        // Set the Model matrix in the shader
+        GLuint modelLoc = glGetUniformLocation(shaderProgram, "u_Model");
+        glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 
-        glActiveTexture(GL_TEXTURE0);
+		// Draw the table
+        glBindVertexArray(VAO);
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+
+		// Draw the balls
+        for (size_t i = 0; i < balls.size(); i++)
+            balls[i].Render(glm::vec3(0, i, 0), glm::vec3(0, 0, 0));
+
+        // --- Minimap Render ---
+        // Calculate minimap viewport size & position (top-right corner)
+        int miniW = WIDTH / 4;
+        int miniH = HEIGHT / 4;
+        int miniX = WIDTH - miniW - 10;
+        int miniY = HEIGHT - miniH - 10;
+
+        // Set viewport for minimap
+        glViewport(miniX, miniY, miniW, miniH);
+        glEnable(GL_SCISSOR_TEST);
+        glScissor(miniX, miniY, miniW, miniH);
+
+        // Only clear depth buffer here to keep main view color visible
+        glClear(GL_DEPTH_BUFFER_BIT);
+
+        // Setup static top-down camera for minimap
+        glm::vec3 topCamPos = glm::vec3(0.0f, 5.0f, 0.0f);
+        glm::vec3 topCamTarget = glm::vec3(0.0f, 0.0f, 0.0f);
+        glm::vec3 topCamUp = glm::vec3(0.0f, 0.0f, -1.0f); // "up" in top-down view
+
+        // Orthographic projection: adjust these bounds to control visible area size
+        float minimapAspect = miniW / (float)miniH;
+        float tableHalfWidth = 1.5f * 0.01f;
+        float tableHalfLenght = 3.0f * 0.01f;
+
+        // Adjusting minimap aspect ratio
+        if (minimapAspect > 1.0f)
+            tableHalfLenght *= minimapAspect; // Wider than tall - expand width
+        else
+            tableHalfWidth /= minimapAspect; // Taller than wide - expand height
+
+        // Padding around the table
+        float padding = 0.5f;
+        tableHalfLenght += padding;
+        tableHalfWidth += padding;
+
+        glm::mat4 topProjection = glm::ortho(-tableHalfWidth, tableHalfWidth, // Left, Right
+            -tableHalfLenght, tableHalfLenght, // Bottom, Top
+            0.1f, 100.0f);
+
+        glm::mat4 topModel = glm::mat4(1.0f);
+        glm::mat4 topView = glm::lookAt(topCamPos, topCamTarget, topCamUp);
+        glm::mat4 topMVP = topProjection * topView * topModel;
+        glUniformMatrix4fv(mvpLoc, 1, GL_FALSE, glm::value_ptr(topMVP));
+        glBindVertexArray(0);
 
 		// Draw the table
 		glBindVertexArray(VAO);
 		glDrawArrays(GL_TRIANGLES, 0, 36);
-		glBindVertexArray(0);
 
 		// Draw the balls
-        for (int i = 0; i <= 15; i++)
-            balls[i].Render(glm::vec3(i *2000, i *2000, i *2000), glm::vec3(0, 0, 0));
+        for (size_t i = 0; i < balls.size(); i++)
+            balls[i].Render(glm::vec3(0, i, 0), glm::vec3(0, 0, 0));
+        glBindVertexArray(0);
+
+        glDisable(GL_SCISSOR_TEST);
+        glViewport(0, 0, WIDTH, HEIGHT);
 
         glfwSwapBuffers(window);
         glfwPollEvents();
