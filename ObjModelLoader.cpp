@@ -20,14 +20,33 @@ namespace PoolGame3D {
 
     bool ObjModelLoader::Load(const std::string& obj_model_filepath) {
         std::string mtlFile, textureFile;
-        if (!LoadOBJ(obj_model_filepath, mtlFile)) return false;
+
+        std::cout << "Loading OBJ: " << obj_model_filepath << std::endl;
+
+        if (!LoadOBJ(obj_model_filepath, mtlFile))
+        {
+            std::cerr << "Failed to load OBJ: " << obj_model_filepath << std::endl;
+            return false;
+        }
 
         // Descobrir o caminho base
         size_t lastSlash = obj_model_filepath.find_last_of("/\\");
         std::string basePath = (lastSlash == std::string::npos) ? "" : obj_model_filepath.substr(0, lastSlash + 1);
 
-        if (!LoadMTL(basePath + mtlFile, textureFile)) return false;
-        if (!LoadTexture(basePath + textureFile)) return false;
+        std::cout << "Loading MTL: " << basePath + mtlFile << std::endl;
+
+        if (!LoadMTL(basePath + mtlFile, textureFile))
+        {
+            std::cerr << "Failed to load MTL: " << mtlFile << std::endl;
+            return false;
+        }
+
+        std::cout << "Loading texture: " << basePath + textureFile << std::endl;
+        if (!LoadTexture(basePath + textureFile))
+        {
+            std::cerr << "Failed to load texture: " << textureFile << std::endl;
+            return false;
+        }
 
         return true;
     }
@@ -129,36 +148,99 @@ namespace PoolGame3D {
             else if (prefix == "f") { // Face
                 hasFaces = true;
                 std::string vertexStr;
+                for (int i = 0; i < 3; ++i) {
+                    if (!(iss >> vertexStr)) break;
 
-                unsigned int v[3], t[3], n[3];
+                    std::replace(vertexStr.begin(), vertexStr.end(), '/', ' ');
+                    std::istringstream viss(vertexStr);
+
+                    unsigned int v, t = 0, n = 0;
+                    viss >> v;
+
+                    if (hasTextcoords) viss >> t;
+                    if (hasNormals) viss >> n;
+
+                    if (v > 0) {
+                        vertexIndices.push_back(v - 1);
+                        if (t > 0) texcoordIndices.push_back(t - 1);
+                        if (n > 0) normalIndices.push_back(n - 1);
+                    }
+                }
+
+                /*unsigned int v[3], t[3], n[3];
                 char slash;
                 for (int i = 0; i < 3; ++i) {
                     iss >> v[i] >> slash >> t[i] >> slash >> n[i];
                     vertexIndices.push_back(v[i]);
                     texcoordIndices.push_back(t[i]);
                     normalIndices.push_back(n[i]);
-                }
+                }*/
             }
         }
         file.close();
 
+        // Validation
+        if (temp_positions.empty()) {
+            std::cerr << "Error: No vertices found in " << path << std::endl;
+            return false;
+        }
+
+        if (!hasFaces) {
+            std::cerr << "Error: No faces found in " << path << std::endl;
+            return false;
+        }
+
         // Reorganizar os dados para OpenGL
         vertices.clear();
         indices.clear();
-        for (size_t i = 0; i < vertexIndices.size(); ++i) {
-            glm::vec3 pos = temp_positions[vertexIndices[i] - 1];
-            glm::vec3 norm = temp_normals[normalIndices[i] - 1];
-            glm::vec2 tex = temp_texcoords[texcoordIndices[i] - 1];
-            vertices.push_back(pos.x);
-            vertices.push_back(pos.y);
-            vertices.push_back(pos.z);
-            vertices.push_back(norm.x);
-            vertices.push_back(norm.y);
-            vertices.push_back(norm.z);
-            vertices.push_back(tex.x);
-            vertices.push_back(tex.y);
-            indices.push_back(i);
+
+        try {
+            for (size_t i = 0; i < vertexIndices.size(); ++i) {
+                /*glm::vec3 pos = temp_positions[vertexIndices[i] - 1];
+                glm::vec3 norm = temp_normals[normalIndices[i] - 1];
+                glm::vec2 tex = temp_texcoords[texcoordIndices[i] - 1];*/
+
+                // Position
+                const auto& pos = temp_positions.at(vertexIndices.at(i));
+                vertices.push_back(pos.x);
+                vertices.push_back(pos.y);
+                vertices.push_back(pos.z);
+
+                // Normal
+                if (hasNormals && i < normalIndices.size()) {
+                    const auto& norm = temp_normals.at(normalIndices.at(i));
+                    vertices.push_back(norm.x);
+                    vertices.push_back(norm.y);
+                    vertices.push_back(norm.z);
+                }
+                else {
+                    vertices.insert(vertices.end(), { 0, 0, 0 }); // Default normal
+                }
+
+                // Texture coordinate (option)
+                if (hasTextcoords && i < texcoordIndices.size()) {
+                    const auto& tex = temp_texcoords.at(texcoordIndices.at(i));
+                    vertices.push_back(tex.x);
+                    vertices.push_back(tex.y);
+                }
+                else {
+                    vertices.insert(vertices.end(), { 0, 0 }); // Default UVs
+                }
+
+                indices.push_back(i);
+            }
         }
+        catch (const std::out_of_range& e) {
+            std::cerr << "Error: Index out of range in " << path << ": " << e.what() << std::endl;
+            return false;
+        }
+
+        std::cout << "Loaded OBJ: " << path
+            << "(Verts: " << temp_positions.size()
+            << ", Normals: " << temp_normals.size()
+            << ", UVs: " << temp_texcoords.size()
+            << ", Faces: " << vertexIndices.size() / 3 << ")" << std::endl;
+
         return true;
     }
 
@@ -169,9 +251,10 @@ namespace PoolGame3D {
         if (!file.is_open()) {
             std::cerr << "Erro ao abrir arquivo MTL: " << path << std::endl;
             return false;
-        }
+        }       
 
-        std::cout << "Texture file: " << textureFile << std::endl;
+        textureFile.clear();
+        bool foundTexture = false;
 
         std::string line;
         while (std::getline(file, line)) {
@@ -180,11 +263,17 @@ namespace PoolGame3D {
             iss >> prefix;
             if (prefix == "map_Kd") {
                 iss >> textureFile;
-                break;
+                foundTexture = true;
             }
         }
         file.close();
-        return !textureFile.empty();
+
+        if (!foundTexture) {
+            std::cerr << "WARNING: No diffuse texture (map_Kd) found in " << path << std::endl;
+        } else
+            std::cout << "Found texture in MTL: " << textureFile << std::endl;
+
+        return foundTexture;
     }
 
     // Carrega textura usando stb_image

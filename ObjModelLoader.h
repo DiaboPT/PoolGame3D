@@ -3,6 +3,7 @@
 #include <vector>
 #include <GL/glew.h>
 #include <glm/glm.hpp>
+#include <algorithm>
 
 namespace PoolGame3D {
 

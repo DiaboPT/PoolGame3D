@@ -613,15 +613,16 @@ int main() {
             ObjModelLoader bola;
             std::string filename = "PoolBalls/Ball" + std::to_string(i) + ".obj";
 
+            std::cout << "Attempting to load: " << filename << std::endl;
             if (bola.Load(filename)) {
+                bola.Install();
                 bolas.push_back(bola);
-                posicoesBolas.push_back(glm::vec3(i * 0.6f, 0.5f, 0.0f));
+                posicoesBolas.push_back(glm::vec3((i - 8) * 0.2f, 0.5f, 0.0f));
+                std::cout << "Successfully loaded ball " << i << std::endl;
             }
             else {
                 std::cerr << "Failed to load: " << filename << std::endl;
             }
-
-            bola.Install();
         }
 
         textureShaderProgram = CreateTextureShaderProgram();
