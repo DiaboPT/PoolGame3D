@@ -13,17 +13,16 @@ namespace PoolGame3D {
 
     ObjModelLoader::ObjModelLoader() : VAO(0), VBO(0), EBO(0), textureID(0) {}
     ObjModelLoader::~ObjModelLoader() {
-        glDeleteVertexArrays(1, &VAO);
-        glDeleteBuffers(1, &VBO);
-        glDeleteBuffers(1, &EBO);
-        glDeleteTextures(1, &textureID);
+        if (VAO) glDeleteVertexArrays(1, &VAO);
+        if (VBO) glDeleteBuffers(1, &VBO);
+        if (EBO) glDeleteBuffers(1, &EBO);
+        if(textureID) glDeleteTextures(1, &textureID);
     }
 
     bool ObjModelLoader::Load(const std::string& obj_model_filepath) {
         std::string mtlFile, textureFile;
 
         std::cout << "Loading OBJ: " << obj_model_filepath << std::endl;
-
         if (!LoadOBJ(obj_model_filepath, mtlFile))
         {
             std::cerr << "Failed to load OBJ: " << obj_model_filepath << std::endl;
@@ -35,7 +34,6 @@ namespace PoolGame3D {
         std::string basePath = (lastSlash == std::string::npos) ? "" : obj_model_filepath.substr(0, lastSlash + 1);
 
         std::cout << "Loading MTL: " << basePath + mtlFile << std::endl;
-
         if (!LoadMTL(basePath + mtlFile, textureFile))
         {
             std::cerr << "Failed to load MTL: " << mtlFile << std::endl;
@@ -53,9 +51,25 @@ namespace PoolGame3D {
     }
 
     void ObjModelLoader::Install() {
+        // Debug output
+        std::cout << "Installing model - Vertices: " << vertices.size() << ", Indices: " << indices.size() << std::endl;
+
         glGenVertexArrays(1, &VAO);
         glGenBuffers(1, &VBO);
         glGenBuffers(1, &EBO);
+
+        // Add validation checks
+        if (VAO == 0 || VBO == 0 || EBO == 0) {
+            std::cerr << "Failed to generate OpenGL buffers!" << std::endl;
+            return;
+        }
+
+        GLenum err = glGetError();
+        if (err != GL_NO_ERROR) {
+            std::cerr << "OpenGL error after VAO creation: " << err << std::endl;
+        }
+
+        std::cout << "Generated VAO: " << VAO << ", VBO: " << VBO << ", EBO: " << EBO << std::endl;
 
         glBindVertexArray(VAO);
         glBindBuffer(GL_ARRAY_BUFFER, VBO);
@@ -73,14 +87,63 @@ namespace PoolGame3D {
         glEnableVertexAttribArray(2);
 
         glBindVertexArray(0);
+        
+        GLenum err2 = glGetError();
+        if (err2 != GL_NO_ERROR) {
+            std::cerr << "OpenGL error after Install(): " << err2 << std::endl;
+        }
     }
 
     void ObjModelLoader::Render(const glm::vec3& position, const glm::vec3& orientation, GLuint shaderProgram, const glm::mat4& viewProj) {
+        if (VAO == 0) {
+            std::cerr << "Render error: VAO not properly initialized!" << std::endl;
+            return;
+        }
+        
+        // Check if shader program is valid
+        if (!glIsProgram(shaderProgram)) {
+            std::cerr << "Render error: Invalid shader program!" << std::endl;
+            return;
+        }
+
+        if (!glIsVertexArray(VAO)) {
+            std::cerr << "VAO " << VAO << " is not a valid vertex array!" << std::endl;
+            return;
+        }
+        
+        if (vertices.empty() || indices.empty()) {
+            std::cerr << "No geometry data to render!" << std::endl;
+            return;
+        }
+
+        if (VAO == 0 || textureID == 0) {
+            std::cerr << "Render error: ";
+            if (VAO == 0) std::cerr << "VAO not initialized";
+            if (textureID == 0) std::cerr << "Texture not loaded";
+            std::cerr << std::endl;
+            return;
+        }
+
         glUseProgram(shaderProgram);
+        GLuint mvpLoc = glGetUniformLocation(shaderProgram, "MVP");
+        if (mvpLoc == -1) {
+            std::cerr << "Shader uniform MVP not found!" << std::endl;
+            return;
+        }
+        
         glBindVertexArray(VAO);
         glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, textureID);
 
+        std::cout << "VAO ID: " << VAO << std::endl;
+
+        if (glIsTexture(textureID)) {
+            glBindTexture(GL_TEXTURE_2D, textureID);
+        }
+        else {
+            std::cerr << "Invalid texture ID: " << textureID << std::endl;
+            return;
+        }
+        
         // Matriz de modelo (posi��o e orienta��o)
         glm::mat4 model = glm::translate(glm::mat4(1.0f), position);
         model = glm::rotate(model, orientation.y, glm::vec3(0, 1, 0));
@@ -88,7 +151,7 @@ namespace PoolGame3D {
         model = glm::rotate(model, orientation.z, glm::vec3(0, 0, 1));
         glm::mat4 mvp = viewProj * model;
 
-        GLuint mvpLoc = glGetUniformLocation(shaderProgram, "MVP");
+        
         glUniformMatrix4fv(mvpLoc, 1, GL_FALSE, &mvp[0][0]);
 
         glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
@@ -262,6 +325,7 @@ namespace PoolGame3D {
             std::istringstream iss(line);
             std::string prefix;
             iss >> prefix;
+
             if (prefix == "map_Kd") {
                 iss >> textureFile;
                 foundTexture = true;
@@ -281,6 +345,12 @@ namespace PoolGame3D {
     bool ObjModelLoader::LoadTexture(const std::string& texturePath) {
         int width, height, nrChannels;
         unsigned char* data = stbi_load(texturePath.c_str(), &width, &height, &nrChannels, 0);
+        
+        if (!stbi_info(texturePath.c_str(), &width, &height, &nrChannels)) {
+            std::cerr << "Cannot read texture info: " << texturePath << " - " << stbi_failure_reason() << std::endl;
+            return false;
+        }
+        
         if (!data) {
             std::cerr << "Falha ao carregar textura: " << texturePath << std::endl;
             return false;
@@ -298,6 +368,13 @@ namespace PoolGame3D {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
         stbi_image_free(data);
+
+        if (textureID == 0) {
+            std::cerr << "Error: Texture failed to load from: " << texturePath << std::endl;
+            return false;
+        }
+        std::cout << "Texture loaded successfully (ID" << textureID << ") from " << texturePath << std::endl;
+
         return true;
     }
 

@@ -10,6 +10,9 @@ namespace PoolGame3D {
 
     class ObjModelLoader {
     public:
+        GLuint VAO, VBO, EBO;
+        GLuint textureID;
+
         ObjModelLoader();
         ~ObjModelLoader();
 
@@ -26,10 +29,9 @@ namespace PoolGame3D {
         // Dados do modelo
         std::vector<float> vertices; // pos(3), normal(3), texcoord(2)
         std::vector<unsigned int> indices;
-        GLuint VAO, VBO, EBO;
-        GLuint textureID;
+        
 
-        // Fun��es auxiliares
+        // Funções auxiliares
         bool LoadOBJ(const std::string& path, std::string& mtlFile);
         bool LoadMTL(const std::string& path, std::string& textureFile);
         bool LoadTexture(const std::string& texturePath);

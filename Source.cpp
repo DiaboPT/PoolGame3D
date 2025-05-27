@@ -121,7 +121,6 @@ using namespace std;
 // Variáveis globais para OpenGL
 GLuint shaderProgram = 0;
 GLuint VAO = 0, VBO = 0;
-GLuint sphereVAO = 0, sphereVBO = 0;
 
 //vetor Bolas
 std::vector<ObjModelLoader> bolas;
@@ -225,17 +224,19 @@ GLuint CreateTextureShaderProgram() {
     glAttachShader(program, fragment);
     glLinkProgram(program);
 
+    glValidateProgram(program);
+    
     GLint sucess;
-
     glGetProgramiv(program, GL_LINK_STATUS, &sucess);
+    
     if (!sucess) {
         char infoLog[512];
         glGetProgramInfoLog(program, 512, nullptr, infoLog);
         std::cerr << "Texture Shader link error" << infoLog << std::endl;
     }
 
-    glDeleteShader(vertex);
-    glDeleteShader(fragment);
+    /*glDeleteShader(vertex);
+    glDeleteShader(fragment);*/
     return program;
 }
 
@@ -457,6 +458,13 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 }
 #pragma endregion
 
+void CheckOpenGLError(const char* stmt, const char* fname, int line) {
+    GLenum err = glGetError();
+    if (err != GL_NO_ERROR) {
+        printf("OpenGL error %08x at %s:%i - for %s\n", err, fname, line, stmt);
+    }
+}
+#define GL_CHECK(stmt) do { stmt; CheckOpenGLError(#stmt, __FILE__, __LINE__); } while (0)
 
 // main function
 int main() {
@@ -524,12 +532,6 @@ int main() {
 
 		// Create a VAO and VBO for the parallelepiped
         CreateParallelepipedMesh(VAO, VBO);
-
-		// Create a sphere mesh
-        for (int i = 1; i < bolas.size(); ++i) {
-            bolas[i].Load("PoolBalls\Ball" + std::to_string(i) + ".obj");
-            bolas[i].Install();
-        }
 
         // Loading the balls
         for (int i = 1; i <= 15; ++i)
@@ -650,20 +652,24 @@ int main() {
         glBindVertexArray(VAO);
         glDrawArrays(GL_TRIANGLES, 0, 36);
 
-		// Render the sphere
+		// Render the balls    
+        if (!glIsProgram(textureShaderProgram)) {
+            std::cerr << "Texture shader program is invalid!" << std::endl;
+            return;
+        }
 
-        // glUseProgram(textureShaderProgram);
-        // for (size_t i = 0; i < bolas.size(); ++i) {
-        //     glm::mat4 ballModel = glm::mat4(1.0f);
-        //     ballModel = glm::translate(ballModel, posicoesBolas[i]);
-        //     ballModel = glm::scale(ballModel, glm::vec3(0.1f)); // Scaling down the balls
-        //     glm::mat4 ballMVP = proj * view * ballModel;
+        for (size_t i = 0; i < bolas.size(); ++i) {
+            if (bolas[i].VAO == 0) {
+                std::cerr << "Ball " << i << " has invalid VAO!" << std::endl;
+                continue;
+            }
 
-        //     bolas[i].Render(posicoesBolas[i], glm::vec3(0.0f), textureShaderProgram, proj* view);
-        // }
-
-        for (int i = 1; i < bolas.size(); ++i) {
-            bolas[i].Render(posicoesBolas[i], glm::vec3(0.0f, 0.0f, 0.0f), 0, view);
+            glm::mat4 ballModel = glm::mat4(1.0f);
+            ballModel = glm::translate(ballModel, posicoesBolas[i]);
+            ballModel = glm::scale(ballModel, glm::vec3(0.1f)); // Scale down the balls
+            
+            // Render each ball in minimap
+            bolas[i].Render(posicoesBolas[i], glm::vec3(0.0f), textureShaderProgram, proj * view);
         }
 
         // --- Minimap Render ---
